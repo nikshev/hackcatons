@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "name-that-llm"
+version = "0.1.1"
+description = "Reproducible data and ML pipeline for the Name That LLM competition"
+requires-python = ">=3.12"
+dependencies = [
+  "pandas",
+  "pyarrow",
+  "scikit-learn",
+  "scipy",
+  "PyYAML",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

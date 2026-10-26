@@ -1,0 +1,20 @@
+#!/bin/sh
+set -eu
+
+ROOT=$(git rev-parse --show-toplevel)
+cd "$ROOT"
+
+for project in "$ROOT"/*; do
+    [ -d "$project" ] || continue
+    [ -f "$project/scripts/trace.py" ] || continue
+
+    name=${project#"$ROOT"/}
+    printf 'pre-commit: validating %s\n' "$name"
+    if ! (cd "$project" && python3 scripts/trace.py); then
+        printf 'pre-commit: trace failed in %s\n' "$name" >&2
+        exit 1
+    fi
+    if [ -f "$project/docs/traceability.md" ]; then
+        git add -- "$name/docs/traceability.md"
+    fi
+done

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "plugin": ["@razroo/opencode-model-fallback"],
+  "compaction": {
+    "auto": true,
+    "tail_turns": 15
+  },
+  "provider": {
+    "openrouter": {
+      "options": {
+        "timeout": 900000,
+        "headerTimeout": 900000,
+        "chunkTimeout": 900000
+      }
+    }
+  }
+}

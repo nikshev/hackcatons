@@ -1,0 +1,49 @@
+# Kaggle's current official Overview/Data pages are authoritative. Local files
+# must still pass the audit before use; increment version and update CHANGELOG
+# whenever a result-affecting configuration value changes.
+version: 2
+data:
+  column_roles:
+    id: id
+    prompt_id: prompt_id
+    text: text
+    label: model
+  files:
+    train:
+      path: data/raw/train.csv
+      required_roles: [id, prompt_id, text, label]
+      source: Kaggle Name That LLM
+      retrieved_at: unverified
+      license_or_terms: unverified; check current Kaggle terms
+    test:
+      path: data/raw/test.csv
+      required_roles: [id, prompt_id, text]
+      source: Kaggle Name That LLM
+      retrieved_at: unverified
+      license_or_terms: unverified; check current Kaggle terms
+
+competition:
+  rules_verified: false
+  eligibility_verified: false
+  allowed_labels:
+    - gpt-5.5
+    - gpt-5.6-luna
+    - gpt-5.6-sol
+    - gpt-5.6-terra
+    - gpt-6-astra
+    - gemini-3.1-pro-preview
+    - gemini-3.6-flash
+    - gemini-3.7-flash
+    - gemini-3.8-flash
+    - claude-fable-5
+    - claude-opus-4-6
+    - claude-opus-4-8
+    - claude-opus-5
+    - claude-sonnet-5
+    - qwen3.8-max
+    - glm-5.3
+    - glm-5.3-flash
+    - kimi-k3
+
+report:
+  path: reports/audit/audit.json
