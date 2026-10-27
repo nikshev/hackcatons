@@ -21,6 +21,8 @@ The official-page search excerpts retrieved on 2026-10-26 state:
 - The listed entry/team-merger deadline is 2027-01-06 and the final submission
   deadline is 2027-01-13, both 11:59 PM UTC. Kaggle says the timeline may change.
 - The competition offers ten prizes of $5,000 each ($50,000 total).
+- Kaggle Rules §4(a) permits access to and use of Competition Data for any
+  purpose, including participating in the competition; checked 2026-10-26.
 - Submissions are made through a Kaggle Notebook. The notebook must write
   `submission.parquet` with one row per test `id` and columns `id` and `model`.
   CPU and GPU notebooks have a nine-hour runtime limit; internet is disabled.
@@ -61,11 +63,11 @@ this set.
 
 ## Still needs direct verification
 
-The following items still need participant-specific or direct terms verification:
+The following items still need participant-specific or external-data verification:
 
 - participant eligibility, territorial availability, and prize payout
   conditions;
-- the applicable data license/terms for any downloaded or external dataset;
+- the license and terms for any external dataset beyond Kaggle Competition Data;
 - any host clarification about paid API generation or publicly shared
   synthetic/API-generated training data.
 
@@ -73,7 +75,9 @@ The current public discussion includes a request for clarification on API-
 generated passages and the reasonableness of paid generation. Freely and
 publicly available external datasets are permitted by the overview; paid API
 generation stays disabled until its treatment is clarified and explicitly
-budgeted. The PRD keeps paid resources off by default.
+budgeted. The PRD keeps paid resources off by default. Personal eligibility and
+payout checks gate entering the competition, not local experiments on the
+official competition train data.
 
 ## Local data state
 
@@ -82,6 +86,32 @@ The documented train schema is therefore a discovery aid, not a substitute for
 auditing the downloaded files. Once data is obtained, record source, retrieval
 date, license/terms, checksum, and row count in its manifest; keep raw files
 unchanged and out of Git where appropriate.
+
+As of 2026-10-26, local `kaggle/train.csv`, `kaggle/test.csv`, and
+`kaggle/sample_submission.parquet` are present. The entire `kaggle/` directory is
+Git-ignored; the audit and split reports record checksums and derived metadata
+without copying passage text.
+
+The local audit passed on 2026-10-26:
+
+- `train.csv`: 2,699 rows; columns `id`, `prompt_id`, `text`, `model`; 150
+  prompt groups; no null/blank values, duplicate IDs, exact duplicate rows, or
+  exact duplicate passages. All 18 official classes are present; 17 have 150
+  rows and `claude-fable-5` has 149.
+- `test.csv`: three interactive rows; observed columns are `id` and `text`, with
+  no `prompt_id` column in this local sample. The split uses train only, so this
+  does not affect prompt-group validation.
+- `sample_submission.parquet`: observed columns are `id` and `model`.
+
+Kaggle Rule 4(a) is verified for use of the official Competition Data, so local
+training readiness is `ready`. Participant eligibility and payout conditions
+remain unverified; `competition_entry_readiness` is still `blocked`.
+
+The local five-fold prompt-group split contains 30 groups per fold, with 540
+rows in four folds and 539 in the fold containing the incomplete prompt group.
+The saved report confirms no prompt group crosses folds. Checksums, exact
+per-fold class counts, and the split hash are in `reports/audit/audit.json` and
+`reports/splits/prompt_folds.json`.
 
 ## Sources
 

@@ -14,10 +14,10 @@
 - [x] T-004 [FR-001-03] Implement CSV schema inspection and configured-role validation in `src/ntllm/data.py`.
 - [x] T-005 [FR-001-04] Write failing tests for SHA-256, provenance metadata, row counts, ordered columns, and unchanged raw inputs in `tests/test_audit.py`.
 - [x] T-006 [FR-001-04] Implement a per-file dataset manifest in `src/ntllm/audit.py`.
-- [ ] T-007 [FR-001-05] Write failing tests for null counts, text-length summaries, exact duplicates, and label counts in `tests/test_audit.py`.
-- [ ] T-008 [FR-001-05] Implement data-quality summaries in `src/ntllm/audit.py`.
-- [ ] T-009 [FR-001-06] Write failing tests for prompt-group availability, duplicate IDs, and invalid text in `tests/test_audit.py`.
-- [ ] T-010 [FR-001-06] Implement group and row-integrity checks in `src/ntllm/validation.py`.
+- [x] T-007 [FR-001-05] Write failing tests for null counts, text-length summaries, exact duplicates, and label counts in `tests/test_audit.py`.
+- [x] T-008 [FR-001-05] Implement data-quality summaries in `src/ntllm/audit.py`.
+- [x] T-009 [FR-001-06] Write failing tests for prompt-group availability, duplicate IDs, and invalid text in `tests/test_validation.py`.
+- [x] T-010 [FR-001-06] Implement group and row-integrity checks in `src/ntllm/validation.py`.
 - [x] T-011 [FR-001-07] critical: Write failing tests proving unresolved rules, missing train labels, or an unknown allowlist block supervised readiness.
 - [x] T-012 [FR-001-07] critical: Implement explicit readiness blockers in `src/ntllm/audit.py`.
 - [x] T-013 [FR-001-08] Write failing tests for missing files, unreadable CSVs, unknown schema, and unrecognized classes.

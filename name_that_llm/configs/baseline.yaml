@@ -1,7 +1,7 @@
 # Kaggle's current official Overview/Data pages are authoritative. Local files
 # must still pass the audit before use; increment version and update CHANGELOG
 # whenever a result-affecting configuration value changes.
-version: 2
+version: 9
 data:
   column_roles:
     id: id
@@ -10,21 +10,23 @@ data:
     label: model
   files:
     train:
-      path: data/raw/train.csv
-      required_roles: [id, prompt_id, text, label]
+      path: kaggle/train.csv
+      required_roles: [id, text, label]
       source: Kaggle Name That LLM
-      retrieved_at: unverified
-      license_or_terms: unverified; check current Kaggle terms
+      retrieved_at: 2026-10-26; file first observed in workspace, source download time not recorded
+      license_or_terms: Kaggle competition data; Rules section 4(a), checked 2026-10-26
     test:
-      path: data/raw/test.csv
-      required_roles: [id, prompt_id, text]
+      path: kaggle/test.csv
+      required_roles: [id, text]
       source: Kaggle Name That LLM
-      retrieved_at: unverified
-      license_or_terms: unverified; check current Kaggle terms
+      retrieved_at: 2026-10-26; file first observed in workspace, source download time not recorded
+      license_or_terms: Kaggle competition data; Rules section 4(a), checked 2026-10-26
 
 competition:
-  rules_verified: false
+  # Official Kaggle Rules §4(a) permits use of Competition Data for participation.
+  rules_verified: true
   eligibility_verified: false
+  payout_verified: false
   allowed_labels:
     - gpt-5.5
     - gpt-5.6-luna
@@ -47,3 +49,46 @@ competition:
 
 report:
   path: reports/audit/audit.json
+
+validation:
+  prompt_group_role: prompt_id
+  n_splits: 5
+  seed: 42
+  assignments_path: reports/splits/prompt_folds.parquet
+  report_path: reports/splits/prompt_folds.json
+
+training:
+  artifact_root: reports/runs
+  models:
+    dummy_most_frequent:
+      type: dummy
+      strategy: most_frequent
+    word_tfidf_svc:
+      type: word_tfidf
+      ngram_range: [1, 2]
+      min_df: 2
+      max_features: 80000
+      sublinear_tf: true
+      c: 1.0
+    char_tfidf_svc:
+      type: char_tfidf
+      ngram_range: [3, 5]
+      min_df: 2
+      max_features: 100000
+      sublinear_tf: true
+      c: 1.0
+    word_char_tfidf_svc:
+      type: word_char_tfidf
+      word_ngram_range: [1, 2]
+      char_ngram_range: [3, 5]
+      min_df: 2
+      word_max_features: 50000
+      char_max_features: 75000
+      sublinear_tf: true
+      c: 1.0
+
+inference:
+  model_candidate: char_tfidf_svc
+  selected_from_run: 80d257594c97c589
+  artifact_root: artifacts/final_models
+  submission_output: reports/submissions/submission.parquet

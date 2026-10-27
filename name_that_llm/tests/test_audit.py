@@ -1,6 +1,7 @@
 # verifies: FR-001-03
 # verifies: FR-001-04
 # verifies: FR-001-02
+# verifies: FR-001-05
 # verifies: FR-001-07
 # verifies: FR-001-08
 
@@ -12,7 +13,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from ntllm.audit import audit_from_config, build_manifest_entry
+from ntllm.audit import audit_from_config, build_manifest_entry, profile_csv
 from ntllm.__main__ import main
 from ntllm.data import AuditDataError, inspect_csv
 
@@ -28,7 +29,10 @@ def test_baseline_config_matches_current_official_kaggle_allowlist():
     config_path = Path(__file__).resolve().parents[1] / "configs" / "baseline.yaml"
     config = yaml.safe_load(config_path.read_text(encoding="utf-8"))
 
-    assert config["version"] == 2
+    assert config["version"] == 9
+    assert "prompt_id" not in config["data"]["files"]["train"]["required_roles"]
+    assert config["competition"]["rules_verified"] is True
+    assert config["competition"]["eligibility_verified"] is False
     assert config["competition"]["allowed_labels"] == [
         "gpt-5.5",
         "gpt-5.6-luna",
@@ -147,6 +151,40 @@ def test_manifest_records_provenance_checksum_rows_and_columns_without_mutation(
     assert source.read_bytes() == original_bytes
 
 
+def test_profile_csv_reports_nulls_text_lengths_duplicates_and_label_counts(tmp_path):
+    source = tmp_path / "train.csv"
+    write_csv(
+        source,
+        ["id", "prompt_id", "text", "model"],
+        [
+            ["a", "p1", "alpha", "model-a"],
+            ["b", "p1", "alpha", "model-b"],
+            ["c", "p2", "longer", "model-a"],
+            ["c", "p2", "longer", "model-a"],
+            ["d", "p2", "", ""],
+        ],
+    )
+
+    profile = profile_csv(
+        source,
+        column_roles={"id": "id", "prompt_id": "prompt_id", "text": "text", "label": "model"},
+    )
+
+    assert profile["null_counts"] == {"id": 0, "prompt_id": 0, "text": 1, "model": 1}
+    assert profile["text_length"] == {"count": 4, "min": 5, "median": 5.5, "max": 6}
+    assert profile["duplicates"] == {"exact_row_count": 1, "exact_text_count": 2}
+    assert profile["label_counts"] == {"model-a": 3, "model-b": 1}
+
+
+def test_profile_csv_omits_label_counts_for_unlabeled_test_file(tmp_path):
+    source = tmp_path / "test.csv"
+    write_csv(source, ["id", "text"], [["a", "sample"]])
+
+    profile = profile_csv(source, column_roles={"id": "id", "text": "text", "label": "model"})
+
+    assert profile["label_counts"] is None
+
+
 def make_config(project_root, *, train_exists=True):
     train_path = project_root / "data" / "raw" / "train.csv"
     train_path.parent.mkdir(parents=True, exist_ok=True)
@@ -196,6 +234,8 @@ def test_audit_from_config_writes_manifest_without_exposing_raw_text(tmp_path):
 
     assert report["audit_status"] == "passed"
     assert report["files"]["train"]["row_count"] == 1
+    assert report["files"]["train"]["quality"]["label_counts"] == {"model-a": 1}
+    assert report["files"]["train"]["integrity"]["prompt_groups"]["available"] is True
     assert report["configuration"]["version"] == 1
     assert len(report["configuration"]["sha256"]) == 64
     assert report["training_readiness"]["status"] == "blocked"
@@ -246,12 +286,53 @@ def test_audit_rejects_label_outside_configured_allowlist(tmp_path):
     assert "model-a" in report["files"]["train"]["error"]
 
 
+def test_audit_fails_and_reports_duplicate_ids_and_blank_text(tmp_path):
+    config_path = make_config(tmp_path)
+    write_csv(
+        tmp_path / "data" / "raw" / "train.csv",
+        ["id", "prompt_id", "text", "model"],
+        [["same", "p1", "first", "model-a"], ["same", "p2", "  ", "model-a"]],
+    )
+
+    report = audit_from_config(config_path)
+
+    assert report["audit_status"] == "failed"
+    assert report["files"]["train"]["integrity"]["row_integrity"] == {
+        "duplicate_id_count": 1,
+        "missing_id_count": 0,
+        "invalid_text_count": 1,
+    }
+    assert "duplicate id" in report["files"]["train"]["error"]
+    assert "empty text" in report["files"]["train"]["error"]
+
+
+def test_audit_reports_unavailable_prompt_groups_without_silently_failing_schema(tmp_path):
+    config_path = make_config(tmp_path)
+    config = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+    config["data"]["files"]["train"]["required_roles"] = ["id", "text", "label"]
+    config_path.write_text(yaml.safe_dump(config), encoding="utf-8")
+    write_csv(
+        tmp_path / "data" / "raw" / "train.csv",
+        ["id", "text", "model"],
+        [["a", "sample", "model-a"]],
+    )
+
+    report = audit_from_config(config_path)
+
+    assert report["audit_status"] == "passed"
+    assert report["files"]["train"]["integrity"]["prompt_groups"]["available"] is False
+    assert report["files"]["train"]["issues"] == [
+        "prompt group column 'prompt_id' is unavailable"
+    ]
+
+
 def test_training_readiness_opens_only_when_rules_data_and_allowlist_are_verified(tmp_path):
     config_path = make_config(tmp_path)
     config = yaml.safe_load(config_path.read_text(encoding="utf-8"))
     config["competition"].update(
         rules_verified=True,
-        eligibility_verified=True,
+        eligibility_verified=False,
+        payout_verified=False,
         allowed_labels=["model-a"],
     )
     train = config["data"]["files"]["train"]
@@ -263,3 +344,7 @@ def test_training_readiness_opens_only_when_rules_data_and_allowlist_are_verifie
 
     assert report["audit_status"] == "passed"
     assert report["training_readiness"] == {"status": "ready", "blockers": []}
+    assert report["competition_entry_readiness"] == {
+        "status": "blocked",
+        "blockers": ["participant eligibility is not verified", "payout conditions are not verified"],
+    }

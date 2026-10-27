@@ -10,13 +10,17 @@
 /target/
 __pycache__/
 *.py[cod]
+*.egg-info/
 .venv/
 .ipynb_checkpoints/
 node_modules/
 /data/raw/
+/kaggle/
 /artifacts/
 /models/
 /reports/runs/
+/reports/splits/
+/reports/submissions/
 .pytest_cache/
 
 # OS

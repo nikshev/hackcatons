@@ -23,14 +23,14 @@
 ## FileAudit
 
 - `manifest`: one `DatasetManifestEntry`.
-- `null_counts`: number of missing values for each observed column.
-- `text_length`: count, minimum, median, and maximum for the configured text
-  column when present.
-- `duplicate_counts`: exact duplicate row/text counts and duplicate ID count.
-- `prompt_groups`: prompt-group column and number of unique groups when present.
-- `label_counts`: observed target counts when the configured label column is
-  present; this is not itself an official allowlist.
-- `issues`: actionable validation findings, including file and field.
+- `quality`: blank/whitespace null counts for each observed column, character
+  length count/min/median/max for nonblank text, exact duplicate-row/text counts
+  beyond the first occurrence, and observed nonblank label counts when a label
+  column is present. Label counts are not an official allowlist.
+- `integrity`: prompt-group availability/counts and duplicate/missing ID and
+  invalid-text counts.
+- `issues`: non-blocking findings such as an unavailable prompt-group column.
+- `blocking_issues`: duplicate/missing IDs and invalid text that fail the audit.
 
 ## AuditReport
 
@@ -39,6 +39,8 @@
 - `files`: one `FileAudit` per configured input.
 - `audit_status`: `passed` or `failed` based on file/schema validity.
 - `training_readiness`: `ready` or `blocked`, independent of audit status.
+- `competition_entry_readiness`: `ready` or `blocked` for participant-specific
+  eligibility and payout conditions; this does not block local model experiments.
 - `blockers`: reasons training is blocked, including missing data, unresolved
   rules/terms, or unconfirmed allowed classes.
 

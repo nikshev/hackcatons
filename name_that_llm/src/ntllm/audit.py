@@ -1,6 +1,8 @@
 """Dataset provenance records for the raw-data audit.
 
 impl: FR-001-04
+impl: FR-001-05
+impl: FR-001-06
 impl: FR-001-07
 impl: FR-001-08
 """
@@ -10,6 +12,7 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
+import statistics
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -18,6 +21,7 @@ from typing import Iterable, Mapping
 import yaml
 
 from ntllm.data import AuditDataError, inspect_csv
+from ntllm.validation import validate_rows
 
 
 @dataclass(frozen=True)
@@ -80,6 +84,78 @@ def build_manifest_entry(
         row_count=inspection.row_count,
         columns=inspection.columns,
     )
+
+
+def profile_csv(
+    path: str | Path,
+    *,
+    column_roles: Mapping[str, str],
+) -> dict[str, object]:
+    """Summarize missing values, text lengths, exact duplicates, and labels.
+
+    Blank or whitespace-only cells count as null. Duplicate counts count rows
+    beyond the first occurrence. Raw cell values are never included in output.
+    """
+    source = Path(path)
+    inspection = inspect_csv(source, column_roles={}, required_roles=())
+    text_column = column_roles.get("text")
+    if not text_column or text_column not in inspection.columns:
+        raise AuditDataError(
+            f"{source}: configured text column is missing; "
+            f"observed columns: {', '.join(inspection.columns)}"
+        )
+    label_column = column_roles.get("label")
+    if label_column not in inspection.columns:
+        label_column = None
+
+    null_counts = {column: 0 for column in inspection.columns}
+    text_lengths: list[int] = []
+    row_counts: dict[tuple[str | None, ...], int] = {}
+    text_counts: dict[str, int] = {}
+    label_counts: dict[str, int] = {}
+
+    try:
+        with source.open("r", encoding="utf-8-sig", newline="") as stream:
+            reader = csv.DictReader(stream)
+            for row in reader:
+                for column in inspection.columns:
+                    value = row.get(column)
+                    if value is None or not value.strip():
+                        null_counts[column] += 1
+
+                row_key = tuple(row.get(column) for column in inspection.columns)
+                row_counts[row_key] = row_counts.get(row_key, 0) + 1
+
+                text = row.get(text_column)
+                if text is not None and text.strip():
+                    text_lengths.append(len(text))
+                    text_counts[text] = text_counts.get(text, 0) + 1
+
+                if label_column is not None:
+                    label = row.get(label_column)
+                    if label is not None and label.strip():
+                        label_counts[label] = label_counts.get(label, 0) + 1
+    except (OSError, UnicodeDecodeError, csv.Error) as exc:
+        raise AuditDataError(f"{source}: cannot profile CSV data: {exc}") from exc
+
+    duplicate_rows = sum(count - 1 for count in row_counts.values() if count > 1)
+    duplicate_texts = sum(count - 1 for count in text_counts.values() if count > 1)
+    text_summary: dict[str, int | float | None] = {
+        "count": len(text_lengths),
+        "min": min(text_lengths) if text_lengths else None,
+        "median": statistics.median(text_lengths) if text_lengths else None,
+        "max": max(text_lengths) if text_lengths else None,
+    }
+
+    return {
+        "null_counts": null_counts,
+        "text_length": text_summary,
+        "duplicates": {
+            "exact_row_count": duplicate_rows,
+            "exact_text_count": duplicate_texts,
+        },
+        "label_counts": dict(sorted(label_counts.items())) if label_column else None,
+    }
 
 
 def _validate_label_allowlist(
@@ -190,6 +266,19 @@ def audit_from_config(config_path: str | Path) -> dict[str, object]:
                     label_column=label_column,
                     allowed_labels=allowed_labels,
                 )
+            file_result["quality"] = profile_csv(
+                file_path,
+                column_roles=roles,
+            )
+            integrity = validate_rows(file_path, column_roles=roles)
+            file_result["integrity"] = integrity
+            if integrity["issues"]:
+                file_result["issues"] = integrity["issues"]
+            if integrity["blocking_issues"]:
+                file_result["error"] = "; ".join(integrity["blocking_issues"])
+                audit_failed = True
+            if _sha256(file_path) != entry.sha256:
+                raise AuditDataError(f"{file_path}: input changed while it was being audited")
         except AuditDataError as exc:
             audit_failed = True
             file_result = audited_files.get(str(name), {"path": str(file_config["path"])})
@@ -199,8 +288,6 @@ def audit_from_config(config_path: str | Path) -> dict[str, object]:
     blockers: list[str] = []
     if competition.get("rules_verified") is not True:
         blockers.append("competition rules are not verified")
-    if competition.get("eligibility_verified") is not True:
-        blockers.append("participant eligibility is not verified")
     if not allowed_labels:
         blockers.append("official allowed-label list is not confirmed")
     train_config = files.get("train")
@@ -223,6 +310,12 @@ def audit_from_config(config_path: str | Path) -> dict[str, object]:
         ):
             blockers.append("train data license or terms are not verified")
 
+    entry_blockers: list[str] = []
+    if competition.get("eligibility_verified") is not True:
+        entry_blockers.append("participant eligibility is not verified")
+    if competition.get("payout_verified") is not True:
+        entry_blockers.append("payout conditions are not verified")
+
     report_config = config.get("report", {})
     if not isinstance(report_config, dict) or not report_config.get("path"):
         raise AuditDataError(f"{source_config}: 'report.path' is required")
@@ -242,6 +335,10 @@ def audit_from_config(config_path: str | Path) -> dict[str, object]:
         "training_readiness": {
             "status": "blocked" if blockers else "ready",
             "blockers": blockers,
+        },
+        "competition_entry_readiness": {
+            "status": "blocked" if entry_blockers else "ready",
+            "blockers": entry_blockers,
         },
     }
     try:
