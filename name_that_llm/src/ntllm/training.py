@@ -5,6 +5,7 @@ impl: FR-003-03, FR-003-04
 impl: FR-003-05, FR-003-09
 impl: FR-003-06, FR-003-07
 impl: FR-003-08
+impl: FR-007-02
 """
 
 from __future__ import annotations
@@ -31,6 +32,7 @@ import pyarrow.parquet as parquet
 import yaml
 from sklearn.dummy import DummyClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import confusion_matrix, f1_score, recall_score
 from sklearn.pipeline import FeatureUnion, Pipeline
 from sklearn.svm import LinearSVC
@@ -128,12 +130,18 @@ def build_estimator(
             model_config.get("max_features"),
         )
     elif model_type == "char_tfidf":
+        analyzer = model_config.get("analyzer", "char")
+        if analyzer not in {"char", "char_wb"}:
+            raise TrainingError(f"model '{candidate_name}' has unsupported char analyzer '{analyzer}'")
         features = vectorizer(
-            "char",
+            analyzer,
             model_config.get("ngram_range"),
             model_config.get("max_features"),
         )
     else:
+        char_analyzer = model_config.get("char_analyzer", "char")
+        if char_analyzer not in {"char", "char_wb"}:
+            raise TrainingError(f"model '{candidate_name}' has unsupported char analyzer '{char_analyzer}'")
         features = FeatureUnion(
             [
                 (
@@ -147,19 +155,63 @@ def build_estimator(
                 (
                     "char",
                     vectorizer(
-                        "char",
+                        char_analyzer,
                         model_config.get("char_ngram_range"),
                         model_config.get("char_max_features"),
                     ),
                 ),
             ]
         )
+    classifier_name = model_config.get("classifier", "svc")
+    if classifier_name == "svc":
+        classifier = LinearSVC(C=float(c_value), dual=True, random_state=seed)
+    elif classifier_name == "logreg":
+        classifier = LogisticRegression(
+            C=float(c_value),
+            solver="lbfgs",
+            max_iter=500,
+            random_state=seed,
+        )
+    else:
+        raise TrainingError(
+            f"model '{candidate_name}' has unknown classifier '{classifier_name}'"
+        )
     return Pipeline(
         [
             ("features", features),
-            ("classifier", LinearSVC(C=float(c_value), dual=True, random_state=seed)),
+            ("classifier", classifier),
         ]
     )
+
+
+def _score_predictions(
+    actual: Sequence[str],
+    predicted: Sequence[str],
+    labels: Sequence[str],
+) -> dict[str, object]:
+    recalls = recall_score(
+        actual,
+        predicted,
+        labels=list(labels),
+        average=None,
+        zero_division=0,
+    )
+    return {
+        "balanced_accuracy": float(mean(recalls)),
+        "macro_f1": float(
+            f1_score(
+                actual,
+                predicted,
+                labels=list(labels),
+                average="macro",
+                zero_division=0,
+            )
+        ),
+        "recall_by_label": {
+            label: float(score) for label, score in zip(labels, recalls, strict=True)
+        },
+        "confusion_matrix": confusion_matrix(actual, predicted, labels=list(labels)).tolist(),
+    }
 
 
 def evaluate_oof(
@@ -253,6 +305,7 @@ def evaluate_oof(
             raise TrainingError("model definitions must be named mappings")
         started = time.perf_counter()
         candidate_predictions: list[dict[str, str | int]] = []
+        fold_metrics: list[dict[str, object]] = []
         for fold in range(n_splits):
             validation_rows = rows_by_fold[fold]
             fit_rows = [row for row in rows if assignment_by_id[row[id_column]][1] != fold]
@@ -267,22 +320,33 @@ def evaluate_oof(
                 raise TrainingError(f"model '{candidate_name}' failed on fold {fold}: {exc}") from exc
             if len(fold_predictions) != len(validation_rows):
                 raise TrainingError(f"model '{candidate_name}' returned an incomplete fold {fold}")
+            fold_prediction_records: list[dict[str, str | int]] = []
             for row, predicted in zip(validation_rows, fold_predictions, strict=True):
                 predicted_label = str(predicted)
                 if predicted_label not in allowed_labels:
                     raise TrainingError(
                         f"model '{candidate_name}' predicted unrecognized label '{predicted_label}'"
                     )
-                candidate_predictions.append(
-                    {
-                        "id": row[id_column],
-                        "prompt_id": row[group_column],
-                        "fold": fold,
-                        "candidate": candidate_name,
-                        "actual": row[label_column],
-                        "prediction": predicted_label,
-                    }
-                )
+                fold_prediction_records.append({
+                    "id": row[id_column],
+                    "prompt_id": row[group_column],
+                    "fold": fold,
+                    "candidate": candidate_name,
+                    "actual": row[label_column],
+                    "prediction": predicted_label,
+                })
+            candidate_predictions.extend(fold_prediction_records)
+            fold_score = _score_predictions(
+                [str(item["actual"]) for item in fold_prediction_records],
+                [str(item["prediction"]) for item in fold_prediction_records],
+                allowed_order,
+            )
+            fold_metrics.append({
+                "fold": fold,
+                "row_count": len(fold_prediction_records),
+                "group_count": len({item["prompt_id"] for item in fold_prediction_records}),
+                **fold_score,
+            })
 
         candidate_predictions.sort(key=lambda item: str(item["id"]))
         if len(candidate_predictions) != len(ids) or {
@@ -292,32 +356,9 @@ def evaluate_oof(
 
         actual = [str(item["actual"]) for item in candidate_predictions]
         predicted = [str(item["prediction"]) for item in candidate_predictions]
-        recalls = recall_score(
-            actual,
-            predicted,
-            labels=allowed_order,
-            average=None,
-            zero_division=0,
-        )
         metrics[candidate_name] = {
-            "balanced_accuracy": float(mean(recalls)),
-            "macro_f1": float(
-                f1_score(
-                    actual,
-                    predicted,
-                    labels=allowed_order,
-                    average="macro",
-                    zero_division=0,
-                )
-            ),
-            "recall_by_label": {
-                label: float(score) for label, score in zip(allowed_order, recalls, strict=True)
-            },
-            "confusion_matrix": confusion_matrix(
-                actual,
-                predicted,
-                labels=allowed_order,
-            ).tolist(),
+            **_score_predictions(actual, predicted, allowed_order),
+            "fold_metrics": fold_metrics,
             "runtime_seconds": time.perf_counter() - started,
         }
         predictions.extend(candidate_predictions)

@@ -38,7 +38,7 @@ def test_notebook_is_generated_from_current_baseline_config():
 
     assert notebook["nbformat"] == 4
     assert notebook["metadata"]["kernelspec"]["name"] == "python3"
-    assert "CONFIG_VERSION = 9" in code
+    assert "CONFIG_VERSION = 12" in code
     assert "MODEL_CANDIDATE = 'char_tfidf_svc'" in code
     assert "claude-fable-5" in code
     assert "submission.parquet" in code

@@ -1,7 +1,7 @@
 # Kaggle's current official Overview/Data pages are authoritative. Local files
 # must still pass the audit before use; increment version and update CHANGELOG
 # whenever a result-affecting configuration value changes.
-version: 9
+version: 12
 data:
   column_roles:
     id: id
@@ -72,7 +72,7 @@ training:
       c: 1.0
     char_tfidf_svc:
       type: char_tfidf
-      ngram_range: [3, 5]
+      ngram_range: [2, 5]
       min_df: 2
       max_features: 100000
       sublinear_tf: true
@@ -89,6 +89,6 @@ training:
 
 inference:
   model_candidate: char_tfidf_svc
-  selected_from_run: 80d257594c97c589
+  selected_from_run: 595089c1e1fe0029
   artifact_root: artifacts/final_models
   submission_output: reports/submissions/submission.parquet

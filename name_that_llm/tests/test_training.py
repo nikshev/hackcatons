@@ -8,6 +8,7 @@
 # verifies: FR-003-08
 # verifies: FR-003-09
 # verifies: FR-003-03
+# verifies: FR-007-02
 
 import csv
 from collections import Counter
@@ -112,6 +113,8 @@ def test_evaluate_oof_returns_complete_predictions_and_metrics():
         assert set(metrics["recall_by_label"]) == set(LABELS)
         assert len(metrics["confusion_matrix"]) == len(LABELS)
         assert all(len(row) == len(LABELS) for row in metrics["confusion_matrix"])
+        assert len(metrics["fold_metrics"]) == 2
+        assert [fold["row_count"] for fold in metrics["fold_metrics"]] == [4, 4]
 
     assert result.metrics["dummy"]["balanced_accuracy"] == pytest.approx(0.5)
 
@@ -376,3 +379,28 @@ def test_train_cli_runs_and_reports_run_directory(tmp_path, capsys):
     output = capsys.readouterr().out
     assert "train: completed grouped OOF benchmark" in output
     assert "run directory:" in output
+
+
+def test_build_estimator_supports_logreg_classifier_option():
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.svm import LinearSVC
+
+    from ntllm.training import build_estimator
+
+    base = {
+        "type": "char_tfidf",
+        "analyzer": "char",
+        "ngram_range": [2, 3],
+        "min_df": 1,
+        "max_features": 100,
+        "sublinear_tf": True,
+        "c": 1.0,
+    }
+    default_est = build_estimator("svc", base, seed=42)
+    assert isinstance(default_est.named_steps["classifier"], LinearSVC)
+
+    logreg_est = build_estimator("logreg", {**base, "classifier": "logreg"}, seed=42)
+    assert isinstance(logreg_est.named_steps["classifier"], LogisticRegression)
+
+    with pytest.raises(TrainingError, match="classifier"):
+        build_estimator("bad", {**base, "classifier": "mystery"}, seed=42)

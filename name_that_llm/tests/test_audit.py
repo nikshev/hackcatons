@@ -29,7 +29,7 @@ def test_baseline_config_matches_current_official_kaggle_allowlist():
     config_path = Path(__file__).resolve().parents[1] / "configs" / "baseline.yaml"
     config = yaml.safe_load(config_path.read_text(encoding="utf-8"))
 
-    assert config["version"] == 9
+    assert config["version"] == 12
     assert "prompt_id" not in config["data"]["files"]["train"]["required_roles"]
     assert config["competition"]["rules_verified"] is True
     assert config["competition"]["eligibility_verified"] is False

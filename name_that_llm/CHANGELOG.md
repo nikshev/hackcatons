@@ -31,6 +31,15 @@
   smoke-test its code against the supplied local competition files.
 - Bump baseline configuration to version 9 and bind final fitting explicitly
   to the repeated grouped OOF benchmark run `80d257594c97c589`.
+- Bump baseline configuration to version 10 and bind final fitting to the
+  current-source OOF run `174e931a846ecb42`.
+- Confirm char 2–5 n-grams on an independent seed-123 grouped split and promote
+  that configuration for the next baseline run.
+- Bump baseline configuration to version 12 and bind the final-fit selection to
+  OOF run `595089c1e1fe0029` using the promoted character range.
+- Compare LinearSVC vs multinomial logreg on frozen char 2–5 features: means
+  tied (0.30079 vs 0.30077), SVC kept for lower spread and better macro F1;
+  no baseline promotion.
 - Add final-fit, offline prediction, and strict submission validation; the
   local three-row Kaggle sample passes the full pipeline smoke test.
 

@@ -9,10 +9,10 @@
   },
   "configuration": {
     "path": "configs/baseline.yaml",
-    "sha256": "39359217b1ecbf06e2c28b594f1f0360ad8ec782ce24389f116ffc0d02e23352",
-    "version": 9
+    "sha256": "80097b9c9e9df68d86b59317c90ca0308b11ac8465b61dce8a95e9549b55ce40",
+    "version": 12
   },
-  "created_at": "2026-10-27T07:51:59.952934+00:00",
+  "created_at": "2026-10-27T08:40:09.821894+00:00",
   "files": {
     "test": {
       "columns": [

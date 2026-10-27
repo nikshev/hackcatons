@@ -1,0 +1,49 @@
+# Confirmation split only; this does not replace the canonical baseline config.
+version: 1
+data:
+  column_roles:
+    id: id
+    prompt_id: prompt_id
+    text: text
+    label: model
+  files:
+    train:
+      path: kaggle/train.csv
+      required_roles: [id, text, label]
+      source: Kaggle Name That LLM
+      retrieved_at: 2026-10-26; file first observed in workspace, source download time not recorded
+      license_or_terms: Kaggle competition data; Rules section 4(a), checked 2026-10-26
+
+competition:
+  rules_verified: true
+  eligibility_verified: false
+  payout_verified: false
+  allowed_labels:
+    - gpt-5.5
+    - gpt-5.6-luna
+    - gpt-5.6-sol
+    - gpt-5.6-terra
+    - gpt-6-astra
+    - gemini-3.1-pro-preview
+    - gemini-3.6-flash
+    - gemini-3.7-flash
+    - gemini-3.8-flash
+    - claude-fable-5
+    - claude-opus-4-6
+    - claude-opus-4-8
+    - claude-opus-5
+    - claude-sonnet-5
+    - qwen3.8-max
+    - glm-5.3
+    - glm-5.3-flash
+    - kimi-k3
+
+report:
+  path: reports/experiments/seed123/audit.json
+
+validation:
+  prompt_group_role: prompt_id
+  n_splits: 5
+  seed: 123
+  assignments_path: artifacts/experiments/seed123/folds.parquet
+  report_path: reports/experiments/seed123/split.json

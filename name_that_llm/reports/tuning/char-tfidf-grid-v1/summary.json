@@ -1,0 +1,467 @@
+{
+  "baseline_config_sha256": "6dc3f8dfab52f5b0994d71128197d8226bb38af899515869e76f690f3c7cdc7a",
+  "baseline_config_version": 10,
+  "candidate_count": 8,
+  "candidates": [
+    {
+      "balanced_accuracy": 0.30079045488441464,
+      "balanced_accuracy_std": 0.016583474348804864,
+      "fold_balanced_accuracy": [
+        0.2759259259259259,
+        0.30185185185185187,
+        0.3074074074074074,
+        0.29259259259259257,
+        0.32618135376756063
+      ],
+      "fold_macro_f1": [
+        0.2640262598992912,
+        0.291120282679311,
+        0.2884611281108554,
+        0.28407145321162836,
+        0.31059877572710537
+      ],
+      "macro_f1": 0.29022736687486633,
+      "macro_f1_std": 0.014901235088703746,
+      "name": "char_ngram_2_5",
+      "parameters": {
+        "analyzer": "char",
+        "c": 1.0,
+        "max_features": 100000,
+        "min_df": 2,
+        "ngram_range": [
+          2,
+          5
+        ],
+        "sublinear_tf": true,
+        "type": "char_tfidf"
+      },
+      "rank": 1,
+      "recall_by_label": {
+        "claude-fable-5": 0.1342281879194631,
+        "claude-opus-4-6": 0.3333333333333333,
+        "claude-opus-4-8": 0.19333333333333333,
+        "claude-opus-5": 0.6,
+        "claude-sonnet-5": 0.23333333333333334,
+        "gemini-3.1-pro-preview": 0.6666666666666666,
+        "gemini-3.6-flash": 0.38666666666666666,
+        "gemini-3.7-flash": 0.43333333333333335,
+        "gemini-3.8-flash": 0.26,
+        "glm-5.3": 0.15333333333333332,
+        "glm-5.3-flash": 0.09333333333333334,
+        "gpt-5.5": 0.21333333333333335,
+        "gpt-5.6-luna": 0.26,
+        "gpt-5.6-sol": 0.18,
+        "gpt-5.6-terra": 0.23333333333333334,
+        "gpt-6-astra": 0.4866666666666667,
+        "kimi-k3": 0.26,
+        "qwen3.8-max": 0.29333333333333333
+      },
+      "runtime_seconds": 54.15298533812165
+    },
+    {
+      "balanced_accuracy": 0.29893114591101166,
+      "balanced_accuracy_std": 0.015582480101200238,
+      "fold_balanced_accuracy": [
+        0.2777777777777778,
+        0.3,
+        0.3037037037037037,
+        0.28888888888888886,
+        0.32426564495530014
+      ],
+      "fold_macro_f1": [
+        0.2631216965078769,
+        0.2862981797488861,
+        0.2799480694694808,
+        0.27820293108482147,
+        0.3062787754962916
+      ],
+      "macro_f1": 0.285022690081918,
+      "macro_f1_std": 0.013999912986622136,
+      "name": "char_c_0_5",
+      "parameters": {
+        "analyzer": "char",
+        "c": 0.5,
+        "max_features": 100000,
+        "min_df": 2,
+        "ngram_range": [
+          3,
+          5
+        ],
+        "sublinear_tf": true,
+        "type": "char_tfidf"
+      },
+      "rank": 2,
+      "recall_by_label": {
+        "claude-fable-5": 0.11409395973154363,
+        "claude-opus-4-6": 0.30666666666666664,
+        "claude-opus-4-8": 0.17333333333333334,
+        "claude-opus-5": 0.6333333333333333,
+        "claude-sonnet-5": 0.22666666666666666,
+        "gemini-3.1-pro-preview": 0.6666666666666666,
+        "gemini-3.6-flash": 0.4,
+        "gemini-3.7-flash": 0.46,
+        "gemini-3.8-flash": 0.26666666666666666,
+        "glm-5.3": 0.14,
+        "glm-5.3-flash": 0.09333333333333334,
+        "gpt-5.5": 0.19333333333333333,
+        "gpt-5.6-luna": 0.26666666666666666,
+        "gpt-5.6-sol": 0.16666666666666666,
+        "gpt-5.6-terra": 0.24,
+        "gpt-6-astra": 0.5066666666666667,
+        "kimi-k3": 0.24,
+        "qwen3.8-max": 0.2866666666666667
+      },
+      "runtime_seconds": 53.35067891702056
+    },
+    {
+      "balanced_accuracy": 0.2966989808600547,
+      "balanced_accuracy_std": 0.016593454481889876,
+      "fold_balanced_accuracy": [
+        0.2796296296296296,
+        0.29444444444444445,
+        0.28703703703703703,
+        0.29444444444444445,
+        0.3280332056194125
+      ],
+      "fold_macro_f1": [
+        0.2690005694994413,
+        0.2812415557242962,
+        0.2683146829391952,
+        0.28115447461979415,
+        0.3160266411636453
+      ],
+      "macro_f1": 0.2840037245866779,
+      "macro_f1_std": 0.01737118765034874,
+      "name": "word_char_reference",
+      "parameters": {
+        "c": 1.0,
+        "char_max_features": 75000,
+        "char_ngram_range": [
+          3,
+          5
+        ],
+        "min_df": 2,
+        "sublinear_tf": true,
+        "type": "word_char_tfidf",
+        "word_max_features": 50000,
+        "word_ngram_range": [
+          1,
+          2
+        ]
+      },
+      "rank": 3,
+      "recall_by_label": {
+        "claude-fable-5": 0.087248322147651,
+        "claude-opus-4-6": 0.2866666666666667,
+        "claude-opus-4-8": 0.19333333333333333,
+        "claude-opus-5": 0.5866666666666667,
+        "claude-sonnet-5": 0.22,
+        "gemini-3.1-pro-preview": 0.6866666666666666,
+        "gemini-3.6-flash": 0.42,
+        "gemini-3.7-flash": 0.37333333333333335,
+        "gemini-3.8-flash": 0.2733333333333333,
+        "glm-5.3": 0.14666666666666667,
+        "glm-5.3-flash": 0.08666666666666667,
+        "gpt-5.5": 0.25333333333333335,
+        "gpt-5.6-luna": 0.22,
+        "gpt-5.6-sol": 0.15333333333333332,
+        "gpt-5.6-terra": 0.2733333333333333,
+        "gpt-6-astra": 0.5,
+        "kimi-k3": 0.28,
+        "qwen3.8-max": 0.3
+      },
+      "runtime_seconds": 48.111302414909005
+    },
+    {
+      "balanced_accuracy": 0.29634849614715386,
+      "balanced_accuracy_std": 0.014930101478891823,
+      "fold_balanced_accuracy": [
+        0.2740740740740741,
+        0.28888888888888886,
+        0.2962962962962963,
+        0.3037037037037037,
+        0.3189016602809706
+      ],
+      "fold_macro_f1": [
+        0.2626856069172885,
+        0.2794588624739343,
+        0.28039932161146186,
+        0.29396390984653886,
+        0.30787224581154676
+      ],
+      "macro_f1": 0.28699182388312683,
+      "macro_f1_std": 0.01518694834612468,
+      "name": "char_ngram_3_4",
+      "parameters": {
+        "analyzer": "char",
+        "c": 1.0,
+        "max_features": 100000,
+        "min_df": 2,
+        "ngram_range": [
+          3,
+          4
+        ],
+        "sublinear_tf": true,
+        "type": "char_tfidf"
+      },
+      "rank": 4,
+      "recall_by_label": {
+        "claude-fable-5": 0.14093959731543623,
+        "claude-opus-4-6": 0.31333333333333335,
+        "claude-opus-4-8": 0.20666666666666667,
+        "claude-opus-5": 0.5866666666666667,
+        "claude-sonnet-5": 0.22666666666666666,
+        "gemini-3.1-pro-preview": 0.6533333333333333,
+        "gemini-3.6-flash": 0.4,
+        "gemini-3.7-flash": 0.37333333333333335,
+        "gemini-3.8-flash": 0.25333333333333335,
+        "glm-5.3": 0.16,
+        "glm-5.3-flash": 0.12,
+        "gpt-5.5": 0.22666666666666666,
+        "gpt-5.6-luna": 0.26666666666666666,
+        "gpt-5.6-sol": 0.17333333333333334,
+        "gpt-5.6-terra": 0.24666666666666667,
+        "gpt-6-astra": 0.47333333333333333,
+        "kimi-k3": 0.24,
+        "qwen3.8-max": 0.2733333333333333
+      },
+      "runtime_seconds": 25.70237016864121
+    },
+    {
+      "balanced_accuracy": 0.2959731543624161,
+      "balanced_accuracy_std": 0.019927996646922033,
+      "fold_balanced_accuracy": [
+        0.26296296296296295,
+        0.3037037037037037,
+        0.29814814814814816,
+        0.29074074074074074,
+        0.3243295019157088
+      ],
+      "fold_macro_f1": [
+        0.25095785954447414,
+        0.29218380850893594,
+        0.2779023082163586,
+        0.27954631252003237,
+        0.30816358363516927
+      ],
+      "macro_f1": 0.28486935620475673,
+      "macro_f1_std": 0.018838039398292972,
+      "name": "char_baseline",
+      "parameters": {
+        "analyzer": "char",
+        "c": 1.0,
+        "max_features": 100000,
+        "min_df": 2,
+        "ngram_range": [
+          3,
+          5
+        ],
+        "sublinear_tf": true,
+        "type": "char_tfidf"
+      },
+      "rank": 5,
+      "recall_by_label": {
+        "claude-fable-5": 0.12751677852348994,
+        "claude-opus-4-6": 0.3333333333333333,
+        "claude-opus-4-8": 0.17333333333333334,
+        "claude-opus-5": 0.6066666666666667,
+        "claude-sonnet-5": 0.22,
+        "gemini-3.1-pro-preview": 0.6666666666666666,
+        "gemini-3.6-flash": 0.4,
+        "gemini-3.7-flash": 0.43333333333333335,
+        "gemini-3.8-flash": 0.26666666666666666,
+        "glm-5.3": 0.14666666666666667,
+        "glm-5.3-flash": 0.09333333333333334,
+        "gpt-5.5": 0.20666666666666667,
+        "gpt-5.6-luna": 0.26,
+        "gpt-5.6-sol": 0.17333333333333334,
+        "gpt-5.6-terra": 0.22,
+        "gpt-6-astra": 0.4666666666666667,
+        "kimi-k3": 0.26,
+        "qwen3.8-max": 0.2733333333333333
+      },
+      "runtime_seconds": 56.55688308365643
+    },
+    {
+      "balanced_accuracy": 0.294862043251305,
+      "balanced_accuracy_std": 0.019158816439704313,
+      "fold_balanced_accuracy": [
+        0.2648148148148148,
+        0.3,
+        0.2962962962962963,
+        0.28888888888888886,
+        0.3243295019157088
+      ],
+      "fold_macro_f1": [
+        0.2519852450948986,
+        0.28759475899977793,
+        0.27654001623314967,
+        0.2769585218269563,
+        0.30832066734591773
+      ],
+      "macro_f1": 0.28331609251281137,
+      "macro_f1_std": 0.01825046615993323,
+      "name": "char_min_df_1",
+      "parameters": {
+        "analyzer": "char",
+        "c": 1.0,
+        "max_features": 100000,
+        "min_df": 1,
+        "ngram_range": [
+          3,
+          5
+        ],
+        "sublinear_tf": true,
+        "type": "char_tfidf"
+      },
+      "rank": 6,
+      "recall_by_label": {
+        "claude-fable-5": 0.12751677852348994,
+        "claude-opus-4-6": 0.3333333333333333,
+        "claude-opus-4-8": 0.17333333333333334,
+        "claude-opus-5": 0.62,
+        "claude-sonnet-5": 0.22,
+        "gemini-3.1-pro-preview": 0.6666666666666666,
+        "gemini-3.6-flash": 0.3933333333333333,
+        "gemini-3.7-flash": 0.4266666666666667,
+        "gemini-3.8-flash": 0.26666666666666666,
+        "glm-5.3": 0.14,
+        "glm-5.3-flash": 0.08666666666666667,
+        "gpt-5.5": 0.20666666666666667,
+        "gpt-5.6-luna": 0.26666666666666666,
+        "gpt-5.6-sol": 0.17333333333333334,
+        "gpt-5.6-terra": 0.21333333333333335,
+        "gpt-6-astra": 0.47333333333333333,
+        "kimi-k3": 0.25333333333333335,
+        "qwen3.8-max": 0.26666666666666666
+      },
+      "runtime_seconds": 48.72326619178057
+    },
+    {
+      "balanced_accuracy": 0.2937484464330102,
+      "balanced_accuracy_std": 0.017630322772113897,
+      "fold_balanced_accuracy": [
+        0.26666666666666666,
+        0.30185185185185187,
+        0.29074074074074074,
+        0.28888888888888886,
+        0.3206257982120051
+      ],
+      "fold_macro_f1": [
+        0.2560680008578668,
+        0.29271778766834433,
+        0.2719583060905892,
+        0.2819564641373822,
+        0.30659547674200466
+      ],
+      "macro_f1": 0.28464482427053023,
+      "macro_f1_std": 0.017280135571892424,
+      "name": "char_c_2",
+      "parameters": {
+        "analyzer": "char",
+        "c": 2.0,
+        "max_features": 100000,
+        "min_df": 2,
+        "ngram_range": [
+          3,
+          5
+        ],
+        "sublinear_tf": true,
+        "type": "char_tfidf"
+      },
+      "rank": 7,
+      "recall_by_label": {
+        "claude-fable-5": 0.12080536912751678,
+        "claude-opus-4-6": 0.34,
+        "claude-opus-4-8": 0.19333333333333333,
+        "claude-opus-5": 0.58,
+        "claude-sonnet-5": 0.22,
+        "gemini-3.1-pro-preview": 0.6533333333333333,
+        "gemini-3.6-flash": 0.38,
+        "gemini-3.7-flash": 0.41333333333333333,
+        "gemini-3.8-flash": 0.26666666666666666,
+        "glm-5.3": 0.14666666666666667,
+        "glm-5.3-flash": 0.09333333333333334,
+        "gpt-5.5": 0.22,
+        "gpt-5.6-luna": 0.26666666666666666,
+        "gpt-5.6-sol": 0.18666666666666668,
+        "gpt-5.6-terra": 0.21333333333333335,
+        "gpt-6-astra": 0.4533333333333333,
+        "kimi-k3": 0.26666666666666666,
+        "qwen3.8-max": 0.2733333333333333
+      },
+      "runtime_seconds": 62.70548411458731
+    },
+    {
+      "balanced_accuracy": 0.28077554064131244,
+      "balanced_accuracy_std": 0.013362257788528394,
+      "fold_balanced_accuracy": [
+        0.2796296296296296,
+        0.25925925925925924,
+        0.29814814814814816,
+        0.2759259259259259,
+        0.2909323116219668
+      ],
+      "fold_macro_f1": [
+        0.2680107287690662,
+        0.25067289331992515,
+        0.28512729687609384,
+        0.27010125707203336,
+        0.28279107361557493
+      ],
+      "macro_f1": 0.27223932033760984,
+      "macro_f1_std": 0.012336648406136248,
+      "name": "char_wb_3_5",
+      "parameters": {
+        "analyzer": "char_wb",
+        "c": 1.0,
+        "max_features": 100000,
+        "min_df": 2,
+        "ngram_range": [
+          3,
+          5
+        ],
+        "sublinear_tf": true,
+        "type": "char_tfidf"
+      },
+      "rank": 8,
+      "recall_by_label": {
+        "claude-fable-5": 0.09395973154362416,
+        "claude-opus-4-6": 0.3333333333333333,
+        "claude-opus-4-8": 0.20666666666666667,
+        "claude-opus-5": 0.5066666666666667,
+        "claude-sonnet-5": 0.24,
+        "gemini-3.1-pro-preview": 0.6466666666666666,
+        "gemini-3.6-flash": 0.36,
+        "gemini-3.7-flash": 0.38,
+        "gemini-3.8-flash": 0.28,
+        "glm-5.3": 0.18,
+        "glm-5.3-flash": 0.1,
+        "gpt-5.5": 0.22666666666666666,
+        "gpt-5.6-luna": 0.22666666666666666,
+        "gpt-5.6-sol": 0.15333333333333332,
+        "gpt-5.6-terra": 0.2,
+        "gpt-6-astra": 0.42,
+        "kimi-k3": 0.22666666666666666,
+        "qwen3.8-max": 0.2733333333333333
+      },
+      "runtime_seconds": 29.8570974227041
+    }
+  ],
+  "experiment_name": "char-tfidf-grid-v1",
+  "experiment_run_id": "bf0c8458b31ce83d",
+  "experiment_sha256": "fdb8b1d44c4ca9ad1725c358ef07abe4c0b8faeed46108047c5ae811d356c9b6",
+  "experiment_version": 1,
+  "failures": [],
+  "git_commit": "2b16715d9a6d0e113e9273d8d34f57d2a67cd5fa",
+  "hypothesis": "A small change to character n-gram range, C, minimum document frequency, or boundary-aware character analysis may improve prompt-held-out balanced accuracy consistently across all five saved folds.",
+  "n_splits": 5,
+  "seed": 42,
+  "source_sha256": "8786ba121dde6530ccc6425d9709ae24a6bd0ad381e5686693b8599971606c91",
+  "split_sha256": "29ae008bff2004518bfafb93e81c2f281d82b61c57f997ec4acdefed35b2111a",
+  "status": "passed",
+  "successful_count": 8,
+  "summary_path": "/opt/hackcatons/name_that_llm/reports/tuning/char-tfidf-grid-v1/summary.json",
+  "train_sha256": "40a22ce8d88c5f46feb4637a099db815bef5f713ffe53e89dbe1b7b21de77707",
+  "working_tree_dirty": true
+}

@@ -37,15 +37,35 @@
    ```
 
    The deterministic run directory contains OOF predictions, metrics, and a
-   manifest. The first real-data result is summarized in `docs/baseline.md`.
+   manifest. Save the printed run ID for the next command.
 
-8. Fit the selected final model on all audited train rows:
+8. Review aggregate OOF mistakes (no raw passages or row IDs are emitted):
 
    ```bash
-   .venv/bin/python -m ntllm fit-final --config configs/baseline.yaml
+   .venv/bin/python -m ntllm evaluate --run-id RUN_ID --config configs/baseline.yaml
    ```
 
-9. Predict the local Kaggle test sample and validate the file:
+   Replace `RUN_ID` with the identifier printed by the grouped OOF run; the
+   resulting report is `reports/runs/RUN_ID/error_analysis.md`.
+
+9. Compare the versioned TF-IDF candidate grid on the same saved prompt folds:
+
+   ```bash
+   .venv/bin/python -m ntllm tune \
+     --config configs/baseline.yaml \
+     --experiment configs/experiments/char_tfidf_grid.yaml
+   ```
+
+   The ranking includes per-fold spread. The test CSV and leaderboard labels
+   are not used.
+
+10. Fit the selected final model on all audited train rows:
+
+    ```bash
+    .venv/bin/python -m ntllm fit-final --config configs/baseline.yaml
+    ```
+
+11. Predict the local Kaggle test sample and validate the file:
 
    Replace `MODEL_DIR` with the bundle path printed by `fit-final`.
 
@@ -60,7 +80,7 @@
      --config configs/baseline.yaml
    ```
 
-10. Regenerate the self-contained offline Kaggle Notebook after any config
+12. Regenerate the self-contained offline Kaggle Notebook after any config
     change:
 
     ```bash

@@ -2,7 +2,7 @@
 
 <!-- ГЕНЕРУЄТЬСЯ scripts/trace.py — не редагувати вручну -->
 
-Вимог: **42** · задач: **84** (виконано 82) · вимог у роботі: **2** · порушень: **0**
+Вимог: **55** · задач: **108** (виконано 106) · вимог у роботі: **2** · порушень: **0**
 
 ## 001-competition-readiness-audit
 
@@ -70,6 +70,29 @@
 | `FR-005-06` | The notebook MUST print a compact run summary with config/data | `T-011`, `T-012` | `scripts/build_submission_notebook.py` | `tests/test_submission_notebook.py` |
 | `FR-005-07` | The committed notebook MUST be reproducible from | `T-003`, `T-004` | `scripts/build_submission_notebook.py` | `tests/test_submission_notebook.py` |
 | `FR-005-08` | Local smoke execution MUST allow explicit input/output path | `T-013` | `scripts/build_submission_notebook.py` | `tests/test_submission_notebook.py` |
+
+## 006-oof-error-analysis-tuning
+
+| Вимога | Опис | Задачі | Імплементація | Тести |
+|---|---|---|---|---|
+| `FR-006-01` | Error analysis MUST consume one named OOF run and verify its | `T-001`, `T-002`, `T-007` | `src/ntllm/analysis.py`, `src/ntllm/__main__.py` | `tests/test_analysis.py` |
+| `FR-006-02` | The report MUST include per-class support/recall, top | `T-003`, `T-004` | `src/ntllm/analysis.py` | `tests/test_analysis.py` |
+| `FR-006-03` | Error-analysis output MUST NOT include raw passage text, row | `T-005`, `T-006` | `src/ntllm/analysis.py` | `tests/test_analysis.py` |
+| `FR-006-04` | Tuning candidates MUST come from a versioned experiment YAML and | `T-008`, `T-009` | `src/ntllm/analysis.py` | `tests/test_analysis.py` |
+| `FR-006-05` | Each candidate MUST report mean and per-fold balanced accuracy, | `T-010` | `src/ntllm/analysis.py` | `tests/test_analysis.py` |
+| `FR-006-06` | Tuning MUST NOT load or inspect `test.csv`, hidden labels, or | `T-011`, `T-012` | `src/ntllm/analysis.py` | `tests/test_analysis.py` |
+| `FR-006-07` | Unsupported model settings, data/split mismatch, incomplete | `T-013`, `T-014` | `src/ntllm/analysis.py` | `tests/test_analysis.py` |
+| `FR-006-08` | Candidate ranking MUST use the primary balanced-accuracy metric | `T-015`, `T-016` | `src/ntllm/analysis.py` | `tests/test_analysis.py` |
+| `FR-006-09` | Generated reports MUST record the experiment config hash, | `T-017`, `T-018` | `src/ntllm/analysis.py`, `src/ntllm/__main__.py` | `tests/test_analysis.py` |
+
+## 007-classifier-comparison-logreg
+
+| Вимога | Опис | Задачі | Імплементація | Тести |
+|---|---|---|---|---|
+| `FR-007-01` | Candidates MUST share the same saved prompt-group folds, train | `T-003`, `T-004` | `src/ntllm/analysis.py` | `tests/test_analysis.py` |
+| `FR-007-02` | The pipeline MUST support a `classifier: logreg` option for | `T-001`, `T-002` | `src/ntllm/training.py` | `tests/test_training.py` |
+| `FR-007-03` | Tuning MUST report mean and per-fold balanced accuracy, macro | `T-005` | `src/ntllm/analysis.py` | `tests/test_analysis.py` |
+| `FR-007-04` | Tuning MUST NOT open `test.csv`, test labels, or leaderboard | `T-006` | `src/ntllm/analysis.py` | `tests/test_analysis.py` |
 
 ## Критичні задачі
 

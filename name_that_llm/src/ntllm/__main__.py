@@ -7,6 +7,7 @@ impl: FR-002-08
 impl: FR-003-06, FR-003-08
 impl: FR-004-01, FR-004-09
 impl: FR-004-04, FR-004-06
+impl: FR-006-01, FR-006-09
 """
 
 from __future__ import annotations
@@ -15,6 +16,7 @@ import argparse
 import sys
 
 from ntllm.audit import audit_from_config
+from ntllm.analysis import AnalysisError, analyze_oof_run, tune_from_config
 from ntllm.data import AuditDataError
 from ntllm.inference import (
     InferenceError,
@@ -47,6 +49,13 @@ def main(argv: list[str] | None = None) -> int:
     validate.add_argument("--input", required=True, help="submission Parquet path")
     validate.add_argument("--test", required=True, help="test CSV path")
     validate.add_argument("--config", default="configs/baseline.yaml", help="YAML config with official labels")
+    evaluate = commands.add_parser("evaluate", help="summarize out-of-fold errors for a run")
+    evaluate.add_argument("--run-id", required=True, help="grouped OOF run ID")
+    evaluate.add_argument("--candidate", help="candidate name (defaults to configured inference model)")
+    evaluate.add_argument("--config", default="configs/baseline.yaml", help="baseline YAML path")
+    tune = commands.add_parser("tune", help="run a bounded candidate grid on the saved folds")
+    tune.add_argument("--config", default="configs/baseline.yaml", help="baseline YAML path")
+    tune.add_argument("--experiment", required=True, help="versioned experiment YAML path")
     args = parser.parse_args(argv)
 
     if args.command == "audit":
@@ -132,6 +141,40 @@ def main(argv: list[str] | None = None) -> int:
         print(f"validate-submission: {result['status']}")
         for issue in result["issues"]:
             print(f"  - {issue}", file=sys.stderr)
+        return 0 if result["status"] == "passed" else 1
+
+    if args.command == "evaluate":
+        try:
+            result = analyze_oof_run(
+                args.run_id,
+                args.config,
+                candidate_name=args.candidate,
+            )
+        except AnalysisError as exc:
+            print(f"evaluate: {exc}", file=sys.stderr)
+            return 1
+        summary = result["summary"]
+        print(
+            f"evaluate: {summary['candidate']} balanced_accuracy="
+            f"{summary['balanced_accuracy']:.4f}; errors={summary['error_count']}"
+        )
+        print(f"error report: {result['report_path']}")
+        return 0
+
+    if args.command == "tune":
+        try:
+            result = tune_from_config(args.config, args.experiment)
+        except AnalysisError as exc:
+            print(f"tune: {exc}", file=sys.stderr)
+            return 1
+        print(f"tune: {result['status']} — {result['successful_count']}/{result['candidate_count']} candidates")
+        for candidate in result["candidates"][:5]:
+            print(
+                f"  #{candidate['rank']} {candidate['name']}: "
+                f"balanced_accuracy={candidate['balanced_accuracy']:.4f} "
+                f"±{candidate['balanced_accuracy_std']:.4f}"
+            )
+        print(f"summary: {result['summary_path']}")
         return 0 if result["status"] == "passed" else 1
 
     return 2

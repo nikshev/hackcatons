@@ -1,0 +1,135 @@
+{
+  "baseline_config_sha256": "80097b9c9e9df68d86b59317c90ca0308b11ac8465b61dce8a95e9549b55ce40",
+  "baseline_config_version": 12,
+  "candidate_count": 2,
+  "candidates": [
+    {
+      "balanced_accuracy": 0.30079045488441464,
+      "balanced_accuracy_std": 0.016583474348804864,
+      "fold_balanced_accuracy": [
+        0.2759259259259259,
+        0.30185185185185187,
+        0.3074074074074074,
+        0.29259259259259257,
+        0.32618135376756063
+      ],
+      "fold_macro_f1": [
+        0.2640262598992912,
+        0.291120282679311,
+        0.2884611281108554,
+        0.28407145321162836,
+        0.31059877572710537
+      ],
+      "macro_f1": 0.29022736687486633,
+      "macro_f1_std": 0.014901235088703746,
+      "name": "char_svc_2_5",
+      "parameters": {
+        "analyzer": "char",
+        "c": 1.0,
+        "classifier": "svc",
+        "max_features": 100000,
+        "min_df": 2,
+        "ngram_range": [
+          2,
+          5
+        ],
+        "sublinear_tf": true,
+        "type": "char_tfidf"
+      },
+      "rank": 1,
+      "recall_by_label": {
+        "claude-fable-5": 0.1342281879194631,
+        "claude-opus-4-6": 0.3333333333333333,
+        "claude-opus-4-8": 0.19333333333333333,
+        "claude-opus-5": 0.6,
+        "claude-sonnet-5": 0.23333333333333334,
+        "gemini-3.1-pro-preview": 0.6666666666666666,
+        "gemini-3.6-flash": 0.38666666666666666,
+        "gemini-3.7-flash": 0.43333333333333335,
+        "gemini-3.8-flash": 0.26,
+        "glm-5.3": 0.15333333333333332,
+        "glm-5.3-flash": 0.09333333333333334,
+        "gpt-5.5": 0.21333333333333335,
+        "gpt-5.6-luna": 0.26,
+        "gpt-5.6-sol": 0.18,
+        "gpt-5.6-terra": 0.23333333333333334,
+        "gpt-6-astra": 0.4866666666666667,
+        "kimi-k3": 0.26,
+        "qwen3.8-max": 0.29333333333333333
+      },
+      "runtime_seconds": 63.96394953690469
+    },
+    {
+      "balanced_accuracy": 0.30077305493412876,
+      "balanced_accuracy_std": 0.021648342151810794,
+      "fold_balanced_accuracy": [
+        0.2759259259259259,
+        0.2814814814814815,
+        0.31666666666666665,
+        0.2962962962962963,
+        0.3336526181353768
+      ],
+      "fold_macro_f1": [
+        0.2603808977777275,
+        0.2674628037046042,
+        0.2904513762940765,
+        0.2805903790452795,
+        0.3188379778607906
+      ],
+      "macro_f1": 0.2841663880977701,
+      "macro_f1_std": 0.02048040416467019,
+      "name": "char_logreg_2_5",
+      "parameters": {
+        "analyzer": "char",
+        "c": 1.0,
+        "classifier": "logreg",
+        "max_features": 100000,
+        "min_df": 2,
+        "ngram_range": [
+          2,
+          5
+        ],
+        "sublinear_tf": true,
+        "type": "char_tfidf"
+      },
+      "rank": 2,
+      "recall_by_label": {
+        "claude-fable-5": 0.087248322147651,
+        "claude-opus-4-6": 0.2733333333333333,
+        "claude-opus-4-8": 0.19333333333333333,
+        "claude-opus-5": 0.6866666666666666,
+        "claude-sonnet-5": 0.26,
+        "gemini-3.1-pro-preview": 0.6333333333333333,
+        "gemini-3.6-flash": 0.38,
+        "gemini-3.7-flash": 0.5133333333333333,
+        "gemini-3.8-flash": 0.24,
+        "glm-5.3": 0.15333333333333332,
+        "glm-5.3-flash": 0.06666666666666667,
+        "gpt-5.5": 0.26,
+        "gpt-5.6-luna": 0.30666666666666664,
+        "gpt-5.6-sol": 0.16,
+        "gpt-5.6-terra": 0.20666666666666667,
+        "gpt-6-astra": 0.4666666666666667,
+        "kimi-k3": 0.29333333333333333,
+        "qwen3.8-max": 0.23333333333333334
+      },
+      "runtime_seconds": 99.05749464966357
+    }
+  ],
+  "experiment_name": "char-logreg-vs-svc-v1",
+  "experiment_run_id": "21ff64f6580ba5b9",
+  "experiment_sha256": "fd2bfac75a5601276b29aefe84504018adcf1cd816f2b28e1bca5c0004f2f72c",
+  "experiment_version": 1,
+  "failures": [],
+  "git_commit": "2b16715d9a6d0e113e9273d8d34f57d2a67cd5fa",
+  "hypothesis": "Multinomial logistic regression on identical char 2-5 TF-IDF features may improve prompt-held-out balanced accuracy over LinearSVC by better handling the confused Gemini/GLM classes.",
+  "n_splits": 5,
+  "seed": 42,
+  "source_sha256": "be0dd40ca498462b3d8f1521b0976cd86dd31d2f4687bd78dc9e22df37e5096b",
+  "split_sha256": "29ae008bff2004518bfafb93e81c2f281d82b61c57f997ec4acdefed35b2111a",
+  "status": "passed",
+  "successful_count": 2,
+  "summary_path": "/opt/hackcatons/name_that_llm/reports/tuning/char-logreg-vs-svc-v1/summary.json",
+  "train_sha256": "40a22ce8d88c5f46feb4637a099db815bef5f713ffe53e89dbe1b7b21de77707",
+  "working_tree_dirty": true
+}

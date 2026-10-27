@@ -1,0 +1,143 @@
+{
+  "artifacts": {
+    "assignments": "artifacts/experiments/seed123/folds.parquet",
+    "report": "reports/experiments/seed123/split.json"
+  },
+  "configuration": {
+    "path": "configs/baseline_seed123.yaml",
+    "sha256": "c7f8f13448c5353f76902f79c44ae83477780ec5c812f5f050a3e9491c49a42c",
+    "version": 1
+  },
+  "dataset_sha256": "40a22ce8d88c5f46feb4637a099db815bef5f713ffe53e89dbe1b7b21de77707",
+  "folds": [
+    {
+      "fold": 0,
+      "group_count": 30,
+      "label_counts": {
+        "claude-fable-5": 30,
+        "claude-opus-4-6": 30,
+        "claude-opus-4-8": 30,
+        "claude-opus-5": 30,
+        "claude-sonnet-5": 30,
+        "gemini-3.1-pro-preview": 30,
+        "gemini-3.6-flash": 30,
+        "gemini-3.7-flash": 30,
+        "gemini-3.8-flash": 30,
+        "glm-5.3": 30,
+        "glm-5.3-flash": 30,
+        "gpt-5.5": 30,
+        "gpt-5.6-luna": 30,
+        "gpt-5.6-sol": 30,
+        "gpt-5.6-terra": 30,
+        "gpt-6-astra": 30,
+        "kimi-k3": 30,
+        "qwen3.8-max": 30
+      },
+      "row_count": 540
+    },
+    {
+      "fold": 1,
+      "group_count": 30,
+      "label_counts": {
+        "claude-fable-5": 30,
+        "claude-opus-4-6": 30,
+        "claude-opus-4-8": 30,
+        "claude-opus-5": 30,
+        "claude-sonnet-5": 30,
+        "gemini-3.1-pro-preview": 30,
+        "gemini-3.6-flash": 30,
+        "gemini-3.7-flash": 30,
+        "gemini-3.8-flash": 30,
+        "glm-5.3": 30,
+        "glm-5.3-flash": 30,
+        "gpt-5.5": 30,
+        "gpt-5.6-luna": 30,
+        "gpt-5.6-sol": 30,
+        "gpt-5.6-terra": 30,
+        "gpt-6-astra": 30,
+        "kimi-k3": 30,
+        "qwen3.8-max": 30
+      },
+      "row_count": 540
+    },
+    {
+      "fold": 2,
+      "group_count": 30,
+      "label_counts": {
+        "claude-fable-5": 30,
+        "claude-opus-4-6": 30,
+        "claude-opus-4-8": 30,
+        "claude-opus-5": 30,
+        "claude-sonnet-5": 30,
+        "gemini-3.1-pro-preview": 30,
+        "gemini-3.6-flash": 30,
+        "gemini-3.7-flash": 30,
+        "gemini-3.8-flash": 30,
+        "glm-5.3": 30,
+        "glm-5.3-flash": 30,
+        "gpt-5.5": 30,
+        "gpt-5.6-luna": 30,
+        "gpt-5.6-sol": 30,
+        "gpt-5.6-terra": 30,
+        "gpt-6-astra": 30,
+        "kimi-k3": 30,
+        "qwen3.8-max": 30
+      },
+      "row_count": 540
+    },
+    {
+      "fold": 3,
+      "group_count": 30,
+      "label_counts": {
+        "claude-fable-5": 30,
+        "claude-opus-4-6": 30,
+        "claude-opus-4-8": 30,
+        "claude-opus-5": 30,
+        "claude-sonnet-5": 30,
+        "gemini-3.1-pro-preview": 30,
+        "gemini-3.6-flash": 30,
+        "gemini-3.7-flash": 30,
+        "gemini-3.8-flash": 30,
+        "glm-5.3": 30,
+        "glm-5.3-flash": 30,
+        "gpt-5.5": 30,
+        "gpt-5.6-luna": 30,
+        "gpt-5.6-sol": 30,
+        "gpt-5.6-terra": 30,
+        "gpt-6-astra": 30,
+        "kimi-k3": 30,
+        "qwen3.8-max": 30
+      },
+      "row_count": 540
+    },
+    {
+      "fold": 4,
+      "group_count": 30,
+      "label_counts": {
+        "claude-fable-5": 29,
+        "claude-opus-4-6": 30,
+        "claude-opus-4-8": 30,
+        "claude-opus-5": 30,
+        "claude-sonnet-5": 30,
+        "gemini-3.1-pro-preview": 30,
+        "gemini-3.6-flash": 30,
+        "gemini-3.7-flash": 30,
+        "gemini-3.8-flash": 30,
+        "glm-5.3": 30,
+        "glm-5.3-flash": 30,
+        "gpt-5.5": 30,
+        "gpt-5.6-luna": 30,
+        "gpt-5.6-sol": 30,
+        "gpt-5.6-terra": 30,
+        "gpt-6-astra": 30,
+        "kimi-k3": 30,
+        "qwen3.8-max": 30
+      },
+      "row_count": 539
+    }
+  ],
+  "n_splits": 5,
+  "row_count": 2699,
+  "seed": 123,
+  "split_sha256": "63b05e327a038cbea14673a54a854467eb1a3696984e83736ed3007d7d46d14e"
+}

@@ -1,0 +1,133 @@
+{
+  "baseline_config_sha256": "c7f8f13448c5353f76902f79c44ae83477780ec5c812f5f050a3e9491c49a42c",
+  "baseline_config_version": 1,
+  "candidate_count": 2,
+  "candidates": [
+    {
+      "balanced_accuracy": 0.3174496644295302,
+      "balanced_accuracy_std": 0.0014695427702316778,
+      "fold_balanced_accuracy": [
+        0.3148148148148148,
+        0.31851851851851853,
+        0.31851851851851853,
+        0.31851851851851853,
+        0.31679438058748405
+      ],
+      "fold_macro_f1": [
+        0.29704774727175687,
+        0.303431700325066,
+        0.3081041349668435,
+        0.3021211509799583,
+        0.30549244882187176
+      ],
+      "macro_f1": 0.3044468802412792,
+      "macro_f1_std": 0.003697726303493046,
+      "name": "char_ngram_2_5",
+      "parameters": {
+        "analyzer": "char",
+        "c": 1.0,
+        "max_features": 100000,
+        "min_df": 2,
+        "ngram_range": [
+          2,
+          5
+        ],
+        "sublinear_tf": true,
+        "type": "char_tfidf"
+      },
+      "rank": 1,
+      "recall_by_label": {
+        "claude-fable-5": 0.11409395973154363,
+        "claude-opus-4-6": 0.36666666666666664,
+        "claude-opus-4-8": 0.22666666666666666,
+        "claude-opus-5": 0.64,
+        "claude-sonnet-5": 0.25333333333333335,
+        "gemini-3.1-pro-preview": 0.7066666666666667,
+        "gemini-3.6-flash": 0.44666666666666666,
+        "gemini-3.7-flash": 0.38,
+        "gemini-3.8-flash": 0.35333333333333333,
+        "glm-5.3": 0.12,
+        "glm-5.3-flash": 0.09333333333333334,
+        "gpt-5.5": 0.24666666666666667,
+        "gpt-5.6-luna": 0.25333333333333335,
+        "gpt-5.6-sol": 0.16,
+        "gpt-5.6-terra": 0.2,
+        "gpt-6-astra": 0.49333333333333335,
+        "kimi-k3": 0.2866666666666667,
+        "qwen3.8-max": 0.37333333333333335
+      },
+      "runtime_seconds": 56.08652417548001
+    },
+    {
+      "balanced_accuracy": 0.311891623166791,
+      "balanced_accuracy_std": 0.008908171859018913,
+      "fold_balanced_accuracy": [
+        0.29444444444444445,
+        0.31296296296296294,
+        0.31666666666666665,
+        0.31666666666666665,
+        0.3186462324393359
+      ],
+      "fold_macro_f1": [
+        0.276712895767744,
+        0.29990235415688493,
+        0.30483752145969745,
+        0.30270858367436415,
+        0.3078562403296468
+      ],
+      "macro_f1": 0.29912868229727735,
+      "macro_f1_std": 0.011153596308536623,
+      "name": "char_baseline",
+      "parameters": {
+        "analyzer": "char",
+        "c": 1.0,
+        "max_features": 100000,
+        "min_df": 2,
+        "ngram_range": [
+          3,
+          5
+        ],
+        "sublinear_tf": true,
+        "type": "char_tfidf"
+      },
+      "rank": 2,
+      "recall_by_label": {
+        "claude-fable-5": 0.10738255033557047,
+        "claude-opus-4-6": 0.35333333333333333,
+        "claude-opus-4-8": 0.22,
+        "claude-opus-5": 0.6266666666666667,
+        "claude-sonnet-5": 0.22666666666666666,
+        "gemini-3.1-pro-preview": 0.7066666666666667,
+        "gemini-3.6-flash": 0.4533333333333333,
+        "gemini-3.7-flash": 0.36666666666666664,
+        "gemini-3.8-flash": 0.3466666666666667,
+        "glm-5.3": 0.12666666666666668,
+        "glm-5.3-flash": 0.09333333333333334,
+        "gpt-5.5": 0.25333333333333335,
+        "gpt-5.6-luna": 0.24666666666666667,
+        "gpt-5.6-sol": 0.16666666666666666,
+        "gpt-5.6-terra": 0.2,
+        "gpt-6-astra": 0.48,
+        "kimi-k3": 0.28,
+        "qwen3.8-max": 0.36
+      },
+      "runtime_seconds": 53.96815827675164
+    }
+  ],
+  "experiment_name": "char-tfidf-seed123-confirmation",
+  "experiment_run_id": "6f130f61cfb8c541",
+  "experiment_sha256": "5ac41d2fc184fb1282a210bfe213ea7ef40416240502cd531d93b681ef5d8ad7",
+  "experiment_version": 1,
+  "failures": [],
+  "git_commit": "2b16715d9a6d0e113e9273d8d34f57d2a67cd5fa",
+  "hypothesis": "The [2, 5] character n-gram range that led the first fixed-fold sweep will retain its advantage over the current [3, 5] char baseline on a second deterministic prompt-group split.",
+  "n_splits": 5,
+  "seed": 123,
+  "source_sha256": "8786ba121dde6530ccc6425d9709ae24a6bd0ad381e5686693b8599971606c91",
+  "split_sha256": "63b05e327a038cbea14673a54a854467eb1a3696984e83736ed3007d7d46d14e",
+  "status": "passed",
+  "successful_count": 2,
+  "summary_path": "/opt/hackcatons/name_that_llm/reports/tuning/char-tfidf-seed123/summary.json",
+  "train_sha256": "40a22ce8d88c5f46feb4637a099db815bef5f713ffe53e89dbe1b7b21de77707",
+  "working_tree_dirty": true
+}

@@ -1,0 +1,89 @@
+{
+  "audit_status": "passed",
+  "competition_entry_readiness": {
+    "blockers": [
+      "participant eligibility is not verified",
+      "payout conditions are not verified"
+    ],
+    "status": "blocked"
+  },
+  "configuration": {
+    "path": "configs/baseline_seed123.yaml",
+    "sha256": "c7f8f13448c5353f76902f79c44ae83477780ec5c812f5f050a3e9491c49a42c",
+    "version": 1
+  },
+  "created_at": "2026-10-27T08:34:33.807776+00:00",
+  "files": {
+    "train": {
+      "columns": [
+        "id",
+        "prompt_id",
+        "text",
+        "model"
+      ],
+      "integrity": {
+        "blocking_issues": [],
+        "issues": [],
+        "prompt_groups": {
+          "available": true,
+          "column": "prompt_id",
+          "missing_count": 0,
+          "unique_count": 150
+        },
+        "row_integrity": {
+          "duplicate_id_count": 0,
+          "invalid_text_count": 0,
+          "missing_id_count": 0
+        }
+      },
+      "license_or_terms": "Kaggle competition data; Rules section 4(a), checked 2026-10-26",
+      "path": "train.csv",
+      "quality": {
+        "duplicates": {
+          "exact_row_count": 0,
+          "exact_text_count": 0
+        },
+        "label_counts": {
+          "claude-fable-5": 149,
+          "claude-opus-4-6": 150,
+          "claude-opus-4-8": 150,
+          "claude-opus-5": 150,
+          "claude-sonnet-5": 150,
+          "gemini-3.1-pro-preview": 150,
+          "gemini-3.6-flash": 150,
+          "gemini-3.7-flash": 150,
+          "gemini-3.8-flash": 150,
+          "glm-5.3": 150,
+          "glm-5.3-flash": 150,
+          "gpt-5.5": 150,
+          "gpt-5.6-luna": 150,
+          "gpt-5.6-sol": 150,
+          "gpt-5.6-terra": 150,
+          "gpt-6-astra": 150,
+          "kimi-k3": 150,
+          "qwen3.8-max": 150
+        },
+        "null_counts": {
+          "id": 0,
+          "model": 0,
+          "prompt_id": 0,
+          "text": 0
+        },
+        "text_length": {
+          "count": 2699,
+          "max": 1900,
+          "median": 670,
+          "min": 230
+        }
+      },
+      "retrieved_at": "2026-10-26; file first observed in workspace, source download time not recorded",
+      "row_count": 2699,
+      "sha256": "40a22ce8d88c5f46feb4637a099db815bef5f713ffe53e89dbe1b7b21de77707",
+      "source": "Kaggle Name That LLM"
+    }
+  },
+  "training_readiness": {
+    "blockers": [],
+    "status": "ready"
+  }
+}

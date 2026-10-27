@@ -1,0 +1,81 @@
+version: 1
+name: char-tfidf-grid-v1
+hypothesis: >-
+  A small change to character n-gram range, C, minimum document frequency, or
+  boundary-aware character analysis may improve prompt-held-out balanced
+  accuracy consistently across all five saved folds.
+output_path: reports/tuning/char-tfidf-grid-v1/summary.json
+
+candidates:
+  char_baseline:
+    type: char_tfidf
+    analyzer: char
+    ngram_range: [3, 5]
+    min_df: 2
+    max_features: 100000
+    sublinear_tf: true
+    c: 1.0
+
+  char_c_0_5:
+    type: char_tfidf
+    analyzer: char
+    ngram_range: [3, 5]
+    min_df: 2
+    max_features: 100000
+    sublinear_tf: true
+    c: 0.5
+
+  char_c_2:
+    type: char_tfidf
+    analyzer: char
+    ngram_range: [3, 5]
+    min_df: 2
+    max_features: 100000
+    sublinear_tf: true
+    c: 2.0
+
+  char_ngram_2_5:
+    type: char_tfidf
+    analyzer: char
+    ngram_range: [2, 5]
+    min_df: 2
+    max_features: 100000
+    sublinear_tf: true
+    c: 1.0
+
+  char_ngram_3_4:
+    type: char_tfidf
+    analyzer: char
+    ngram_range: [3, 4]
+    min_df: 2
+    max_features: 100000
+    sublinear_tf: true
+    c: 1.0
+
+  char_min_df_1:
+    type: char_tfidf
+    analyzer: char
+    ngram_range: [3, 5]
+    min_df: 1
+    max_features: 100000
+    sublinear_tf: true
+    c: 1.0
+
+  char_wb_3_5:
+    type: char_tfidf
+    analyzer: char_wb
+    ngram_range: [3, 5]
+    min_df: 2
+    max_features: 100000
+    sublinear_tf: true
+    c: 1.0
+
+  word_char_reference:
+    type: word_char_tfidf
+    word_ngram_range: [1, 2]
+    char_ngram_range: [3, 5]
+    min_df: 2
+    word_max_features: 50000
+    char_max_features: 75000
+    sublinear_tf: true
+    c: 1.0
