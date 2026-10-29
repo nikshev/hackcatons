@@ -1,0 +1,138 @@
+{
+  "baseline_config_sha256": "80097b9c9e9df68d86b59317c90ca0308b11ac8465b61dce8a95e9549b55ce40",
+  "baseline_config_version": 12,
+  "candidate_count": 2,
+  "candidates": [
+    {
+      "balanced_accuracy": 0.30670643798160574,
+      "balanced_accuracy_std": 0.021002863950356093,
+      "fold_balanced_accuracy": [
+        0.3,
+        0.2796296296296296,
+        0.337037037037037,
+        0.29259259259259257,
+        0.32426564495530014
+      ],
+      "fold_macro_f1": [
+        0.28822082515241315,
+        0.27142390109161973,
+        0.31655792733194205,
+        0.2810062277201715,
+        0.3162525891191964
+      ],
+      "macro_f1": 0.2948006692794171,
+      "macro_f1_std": 0.018512475115087593,
+      "name": "svd512_char_2_5",
+      "parameters": {
+        "analyzer": "char",
+        "architecture": "flat",
+        "c": 1.0,
+        "classifier": "svc",
+        "max_features": 100000,
+        "min_df": 2,
+        "ngram_range": [
+          2,
+          5
+        ],
+        "sublinear_tf": true,
+        "svd_components": 512,
+        "type": "char_tfidf"
+      },
+      "rank": 1,
+      "recall_by_label": {
+        "claude-fable-5": 0.10738255033557047,
+        "claude-opus-4-6": 0.3466666666666667,
+        "claude-opus-4-8": 0.23333333333333334,
+        "claude-opus-5": 0.6666666666666666,
+        "claude-sonnet-5": 0.3333333333333333,
+        "gemini-3.1-pro-preview": 0.6466666666666666,
+        "gemini-3.6-flash": 0.34,
+        "gemini-3.7-flash": 0.42,
+        "gemini-3.8-flash": 0.28,
+        "glm-5.3": 0.15333333333333332,
+        "glm-5.3-flash": 0.11333333333333333,
+        "gpt-5.5": 0.19333333333333333,
+        "gpt-5.6-luna": 0.25333333333333335,
+        "gpt-5.6-sol": 0.17333333333333334,
+        "gpt-5.6-terra": 0.20666666666666667,
+        "gpt-6-astra": 0.4866666666666667,
+        "kimi-k3": 0.26666666666666666,
+        "qwen3.8-max": 0.3
+      },
+      "runtime_seconds": 704.2300422359258
+    },
+    {
+      "balanced_accuracy": 0.30079045488441464,
+      "balanced_accuracy_std": 0.016583474348804864,
+      "fold_balanced_accuracy": [
+        0.2759259259259259,
+        0.30185185185185187,
+        0.3074074074074074,
+        0.29259259259259257,
+        0.32618135376756063
+      ],
+      "fold_macro_f1": [
+        0.2640262598992912,
+        0.291120282679311,
+        0.2884611281108554,
+        0.28407145321162836,
+        0.31059877572710537
+      ],
+      "macro_f1": 0.29022736687486633,
+      "macro_f1_std": 0.014901235088703746,
+      "name": "flat_char_2_5",
+      "parameters": {
+        "analyzer": "char",
+        "architecture": "flat",
+        "c": 1.0,
+        "classifier": "svc",
+        "max_features": 100000,
+        "min_df": 2,
+        "ngram_range": [
+          2,
+          5
+        ],
+        "sublinear_tf": true,
+        "type": "char_tfidf"
+      },
+      "rank": 2,
+      "recall_by_label": {
+        "claude-fable-5": 0.1342281879194631,
+        "claude-opus-4-6": 0.3333333333333333,
+        "claude-opus-4-8": 0.19333333333333333,
+        "claude-opus-5": 0.6,
+        "claude-sonnet-5": 0.23333333333333334,
+        "gemini-3.1-pro-preview": 0.6666666666666666,
+        "gemini-3.6-flash": 0.38666666666666666,
+        "gemini-3.7-flash": 0.43333333333333335,
+        "gemini-3.8-flash": 0.26,
+        "glm-5.3": 0.15333333333333332,
+        "glm-5.3-flash": 0.09333333333333334,
+        "gpt-5.5": 0.21333333333333335,
+        "gpt-5.6-luna": 0.26,
+        "gpt-5.6-sol": 0.18,
+        "gpt-5.6-terra": 0.23333333333333334,
+        "gpt-6-astra": 0.4866666666666667,
+        "kimi-k3": 0.26,
+        "qwen3.8-max": 0.29333333333333333
+      },
+      "runtime_seconds": 62.17500074394047
+    }
+  ],
+  "experiment_name": "char-svd-v1",
+  "experiment_run_id": "64a78a462546d81a",
+  "experiment_sha256": "099eaf5241a1445c6df52de3f6718ac361d338fc38990c130e045b765dcbfc24",
+  "experiment_version": 1,
+  "failures": [],
+  "git_commit": "bdd71534cac93cdb9cd6ed24e2d0cd0afab78c2d",
+  "hypothesis": "A 512-component TruncatedSVD projection of char 2-5 TF-IDF generalizes better across unseen prompts than sparse features, improving prompt-held-out balanced accuracy on the same five saved folds.",
+  "n_splits": 5,
+  "seed": 42,
+  "source_sha256": "4b9364142709d78df74ffdaec260b9d094a5764e67efb2f7a79b4d89c07dbe8a",
+  "split_sha256": "29ae008bff2004518bfafb93e81c2f281d82b61c57f997ec4acdefed35b2111a",
+  "status": "passed",
+  "successful_count": 2,
+  "summary_path": "/opt/hackcatons/name_that_llm/reports/tuning/char-svd-v1/summary.json",
+  "train_sha256": "40a22ce8d88c5f46feb4637a099db815bef5f713ffe53e89dbe1b7b21de77707",
+  "working_tree_dirty": true
+}

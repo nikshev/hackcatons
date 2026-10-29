@@ -1,0 +1,30 @@
+version: 1
+name: char-svd-seed123-confirmation
+hypothesis: >-
+  The SVD-512 advantage over sparse char 2-5 on seed-42 persists on a second
+  deterministic prompt-group split.
+output_path: reports/tuning/char-svd-seed123/summary.json
+
+candidates:
+  flat_char_2_5:
+    type: char_tfidf
+    analyzer: char
+    ngram_range: [2, 5]
+    min_df: 2
+    max_features: 100000
+    sublinear_tf: true
+    c: 1.0
+    classifier: svc
+    architecture: flat
+
+  svd512_char_2_5:
+    type: char_tfidf
+    analyzer: char
+    ngram_range: [2, 5]
+    min_df: 2
+    max_features: 100000
+    sublinear_tf: true
+    c: 1.0
+    classifier: svc
+    svd_components: 512
+    architecture: flat

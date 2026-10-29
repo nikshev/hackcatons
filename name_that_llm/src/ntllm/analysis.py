@@ -4,6 +4,12 @@ impl: FR-006-01, FR-006-02, FR-006-03
 impl: FR-006-04, FR-006-05, FR-006-06
 impl: FR-006-07, FR-006-08, FR-006-09
 impl: FR-007-01, FR-007-03, FR-007-04
+impl: FR-008-01, FR-008-04, FR-008-05
+impl: FR-009-01, FR-009-04, FR-009-05
+impl: FR-010-01, FR-010-04, FR-010-05
+impl: FR-011-01, FR-011-04, FR-011-05
+impl: FR-012-01, FR-012-04, FR-012-05
+impl: FR-013-01, FR-013-04, FR-013-05
 """
 
 from __future__ import annotations
@@ -23,7 +29,17 @@ import yaml
 from sklearn.metrics import f1_score, recall_score
 
 from ntllm.data import AuditDataError, inspect_csv
-from ntllm.training import TrainingError, _git_provenance, _sha256, _source_sha256, evaluate_oof
+from ntllm.embeddings import model_dir_sha
+from ntllm.training import (
+    TrainingError,
+    _git_provenance,
+    _sha256,
+    _source_sha256,
+    evaluate_embedding_oof,
+    evaluate_gemini_rerank_oof,
+    evaluate_hierarchical_oof,
+    evaluate_oof,
+)
 
 
 class AnalysisError(ValueError):
@@ -394,14 +410,49 @@ def tune_from_config(
         raise AnalysisError("split artifacts are stale for the current baseline config/data")
 
     train_rows, _ = _read_train(config, project_root, train_sha)
+    embedding_model_sha: str | None = None
+    if any(
+        isinstance(model_config, Mapping) and model_config.get("type") == "sbert_logreg"
+        for model_config in candidates.values()
+    ):
+        embedding_model_dir = _project_path(
+            project_root,
+            experiment.get("embedding_model_dir", "models/all-MiniLM-L6-v2"),
+            key="experiment.embedding_model_dir",
+        )
+        try:
+            embedding_model_sha = model_dir_sha(embedding_model_dir)
+        except Exception as exc:
+            raise AnalysisError(f"embedding model unavailable: {exc}")
     valid_candidates: list[dict[str, object]] = []
     failed_candidates: list[dict[str, str]] = []
     for name, model_config in candidates.items():
         if not isinstance(name, str) or not name.strip() or not isinstance(model_config, Mapping):
             failed_candidates.append({"name": str(name), "error": "candidate must be a named mapping"})
             continue
+        architecture = model_config.get("architecture", "flat")
+        if architecture not in {"flat", "hierarchical", "gemini_rerank"}:
+            failed_candidates.append({"name": name, "error": f"unknown architecture '{architecture}'"})
+            continue
+        if model_config.get("type") == "sbert_logreg":
+            evaluator = evaluate_embedding_oof
+        elif architecture == "hierarchical":
+            evaluator = evaluate_hierarchical_oof
+        elif architecture == "gemini_rerank":
+            evaluator = evaluate_gemini_rerank_oof
+        else:
+            evaluator = evaluate_oof
+        extra_kwargs: dict[str, object] = {}
+        if model_config.get("type") == "sbert_logreg":
+            embedding_dir = _project_path(
+                project_root,
+                experiment.get("embedding_model_dir", "models/all-MiniLM-L6-v2"),
+                key="experiment.embedding_model_dir",
+            )
+            extra_kwargs["embedding_model_dir"] = embedding_dir
+            model_config = {**model_config, "embedding_model_sha256": embedding_model_sha}
         try:
-            result = evaluate_oof(
+            result = evaluator(
                 train_rows,
                 assignments,
                 id_column=id_column,
@@ -412,6 +463,7 @@ def tune_from_config(
                 n_splits=validation["n_splits"],
                 seed=validation["seed"],
                 models={name: model_config},
+                **extra_kwargs,
             )
         except TrainingError as exc:
             failed_candidates.append({"name": name, "error": str(exc)})
@@ -451,6 +503,7 @@ def tune_from_config(
             "train_sha256": train_sha,
             "split_sha256": split_report["split_sha256"],
             "source_sha256": source_hash,
+            "embedding_model_sha256": embedding_model_sha,
         },
         sort_keys=True,
         separators=(",", ":"),
@@ -477,6 +530,7 @@ def tune_from_config(
         "train_sha256": train_sha,
         "split_sha256": split_report["split_sha256"],
         "source_sha256": source_hash,
+        "embedding_model_sha256": embedding_model_sha,
         "git_commit": commit,
         "working_tree_dirty": dirty,
         "n_splits": validation["n_splits"],

@@ -49,7 +49,7 @@ def test_baseline_config_has_explicit_split_seed_and_artifact_paths():
     config_path = Path(__file__).resolve().parents[1] / "configs" / "baseline.yaml"
     config = yaml.safe_load(config_path.read_text(encoding="utf-8"))
 
-    assert config["version"] == 12
+    assert config["version"] == 13
     assert config["validation"] == {
         "prompt_group_role": "prompt_id",
         "n_splits": 5,

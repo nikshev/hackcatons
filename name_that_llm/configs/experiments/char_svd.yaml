@@ -1,0 +1,31 @@
+version: 1
+name: char-svd-v1
+hypothesis: >-
+  A 512-component TruncatedSVD projection of char 2-5 TF-IDF generalizes better
+  across unseen prompts than sparse features, improving prompt-held-out
+  balanced accuracy on the same five saved folds.
+output_path: reports/tuning/char-svd-v1/summary.json
+
+candidates:
+  flat_char_2_5:
+    type: char_tfidf
+    analyzer: char
+    ngram_range: [2, 5]
+    min_df: 2
+    max_features: 100000
+    sublinear_tf: true
+    c: 1.0
+    classifier: svc
+    architecture: flat
+
+  svd512_char_2_5:
+    type: char_tfidf
+    analyzer: char
+    ngram_range: [2, 5]
+    min_df: 2
+    max_features: 100000
+    sublinear_tf: true
+    c: 1.0
+    classifier: svc
+    svd_components: 512
+    architecture: flat

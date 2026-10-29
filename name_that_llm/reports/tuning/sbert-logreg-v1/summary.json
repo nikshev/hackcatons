@@ -1,0 +1,131 @@
+{
+  "baseline_config_sha256": "80097b9c9e9df68d86b59317c90ca0308b11ac8465b61dce8a95e9549b55ce40",
+  "baseline_config_version": 12,
+  "candidate_count": 2,
+  "candidates": [
+    {
+      "balanced_accuracy": 0.30079045488441464,
+      "balanced_accuracy_std": 0.016583474348804864,
+      "fold_balanced_accuracy": [
+        0.2759259259259259,
+        0.30185185185185187,
+        0.3074074074074074,
+        0.29259259259259257,
+        0.32618135376756063
+      ],
+      "fold_macro_f1": [
+        0.2640262598992912,
+        0.291120282679311,
+        0.2884611281108554,
+        0.28407145321162836,
+        0.31059877572710537
+      ],
+      "macro_f1": 0.29022736687486633,
+      "macro_f1_std": 0.014901235088703746,
+      "name": "flat_char_2_5",
+      "parameters": {
+        "analyzer": "char",
+        "architecture": "flat",
+        "c": 1.0,
+        "classifier": "svc",
+        "max_features": 100000,
+        "min_df": 2,
+        "ngram_range": [
+          2,
+          5
+        ],
+        "sublinear_tf": true,
+        "type": "char_tfidf"
+      },
+      "rank": 1,
+      "recall_by_label": {
+        "claude-fable-5": 0.1342281879194631,
+        "claude-opus-4-6": 0.3333333333333333,
+        "claude-opus-4-8": 0.19333333333333333,
+        "claude-opus-5": 0.6,
+        "claude-sonnet-5": 0.23333333333333334,
+        "gemini-3.1-pro-preview": 0.6666666666666666,
+        "gemini-3.6-flash": 0.38666666666666666,
+        "gemini-3.7-flash": 0.43333333333333335,
+        "gemini-3.8-flash": 0.26,
+        "glm-5.3": 0.15333333333333332,
+        "glm-5.3-flash": 0.09333333333333334,
+        "gpt-5.5": 0.21333333333333335,
+        "gpt-5.6-luna": 0.26,
+        "gpt-5.6-sol": 0.18,
+        "gpt-5.6-terra": 0.23333333333333334,
+        "gpt-6-astra": 0.4866666666666667,
+        "kimi-k3": 0.26,
+        "qwen3.8-max": 0.29333333333333333
+      },
+      "runtime_seconds": 80.61726086586714
+    },
+    {
+      "balanced_accuracy": 0.1344668158090977,
+      "balanced_accuracy_std": 0.013785805268481737,
+      "fold_balanced_accuracy": [
+        0.10925925925925926,
+        0.14444444444444443,
+        0.14814814814814814,
+        0.1388888888888889,
+        0.13154533844189017
+      ],
+      "fold_macro_f1": [
+        0.09444110431703273,
+        0.1304457005133707,
+        0.13976713394974496,
+        0.12942747535849067,
+        0.12120941906347515
+      ],
+      "macro_f1": 0.12375662668183714,
+      "macro_f1_std": 0.015470536270201276,
+      "name": "sbert_minilm_logreg",
+      "parameters": {
+        "architecture": "flat",
+        "c": 1.0,
+        "embedding_model_sha256": "27c4daf399e1fee16ec7e86ce6fc865d80e3b2bb76c42ad4e99fb01033e4b8d4",
+        "max_iter": 1000,
+        "type": "sbert_logreg"
+      },
+      "rank": 2,
+      "recall_by_label": {
+        "claude-fable-5": 0.06040268456375839,
+        "claude-opus-4-6": 0.09333333333333334,
+        "claude-opus-4-8": 0.06666666666666667,
+        "claude-opus-5": 0.3466666666666667,
+        "claude-sonnet-5": 0.08666666666666667,
+        "gemini-3.1-pro-preview": 0.22666666666666666,
+        "gemini-3.6-flash": 0.19333333333333333,
+        "gemini-3.7-flash": 0.23333333333333334,
+        "gemini-3.8-flash": 0.28,
+        "glm-5.3": 0.07333333333333333,
+        "glm-5.3-flash": 0.02,
+        "gpt-5.5": 0.10666666666666667,
+        "gpt-5.6-luna": 0.08666666666666667,
+        "gpt-5.6-sol": 0.06666666666666667,
+        "gpt-5.6-terra": 0.11333333333333333,
+        "gpt-6-astra": 0.18,
+        "kimi-k3": 0.14666666666666667,
+        "qwen3.8-max": 0.04
+      },
+      "runtime_seconds": 18.86313177086413
+    }
+  ],
+  "embedding_model_sha256": "27c4daf399e1fee16ec7e86ce6fc865d80e3b2bb76c42ad4e99fb01033e4b8d4",
+  "experiment_name": "sbert-logreg-v1",
+  "experiment_run_id": "139f68a8d09ffd78",
+  "experiment_sha256": "f20073234443bd410664ccecbcb45e4cc26477b43ae660b92218be946a01f3fc",
+  "experiment_version": 1,
+  "failures": [],
+  "git_commit": "bdd71534cac93cdb9cd6ed24e2d0cd0afab78c2d",
+  "hypothesis": "Frozen MiniLM embeddings with logistic regression generalize better across unseen prompts than sparse char TF-IDF, improving prompt-held-out balanced accuracy on the same five saved folds.",
+  "n_splits": 5,
+  "seed": 42,
+  "source_sha256": "e07b1979efc9a0a400bf213ec760917ec9fe1f6b2db677bbc61464187e7baf15",
+  "split_sha256": "29ae008bff2004518bfafb93e81c2f281d82b61c57f997ec4acdefed35b2111a",
+  "status": "passed",
+  "successful_count": 2,
+  "summary_path": "/opt/hackcatons/name_that_llm/reports/tuning/sbert-logreg-v1/summary.json",
+  "train_sha256": "40a22ce8d88c5f46feb4637a099db815bef5f713ffe53e89dbe1b7b21de77707",
+  "working_tree_dirty": true
+}

@@ -1,0 +1,35 @@
+version: 1
+name: style-grid-seed123-confirmation
+hypothesis: >-
+  The style+char fusion advantage over flat char TF-IDF persists on a second
+  deterministic prompt-group split.
+output_path: reports/tuning/style-grid-seed123/summary.json
+
+candidates:
+  flat_char_2_5:
+    type: char_tfidf
+    analyzer: char
+    ngram_range: [2, 5]
+    min_df: 2
+    max_features: 100000
+    sublinear_tf: true
+    c: 1.0
+    classifier: svc
+    architecture: flat
+
+  style_only:
+    type: style_svc
+    c: 1.0
+    classifier: svc
+    architecture: flat
+
+  style_char_fusion:
+    type: style_char_tfidf
+    analyzer: char
+    ngram_range: [2, 5]
+    min_df: 2
+    max_features: 100000
+    sublinear_tf: true
+    c: 1.0
+    classifier: svc
+    architecture: flat

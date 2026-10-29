@@ -67,7 +67,8 @@
 
 11. Predict the local Kaggle test sample and validate the file:
 
-   Replace `MODEL_DIR` with the bundle path printed by `fit-final`.
+   Replace `MODEL_DIR` with the bundle path printed by `fit-final`
+   (current production bundle: `artifacts/final_models/a62b372f62d35767/`).
 
    ```bash
    .venv/bin/python -m ntllm predict \

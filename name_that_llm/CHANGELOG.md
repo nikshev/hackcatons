@@ -37,9 +37,35 @@
   that configuration for the next baseline run.
 - Bump baseline configuration to version 12 and bind the final-fit selection to
   OOF run `595089c1e1fe0029` using the promoted character range.
+- Compare flat vs provider-routed hierarchical classification on identical char
+  2–5 features: hierarchical leads on seed-42 (+0.0048) but loses on the seed-123
+  confirmation split; no promotion, flat baseline kept.
+- Add `classifier: logreg` pipeline option; multinomial logreg ties LinearSVC on
+  mean balanced accuracy with worse spread and macro F1, so SVC is kept.
 - Compare LinearSVC vs multinomial logreg on frozen char 2–5 features: means
   tied (0.30079 vs 0.30077), SVC kept for lower spread and better macro F1;
   no baseline promotion.
+- Add handcrafted stylometric features (punctuation, case, length, repetition,
+  function words) with `style_svc` and `style_char_tfidf` estimators; the
+  style+char fusion beats flat char 2–5 on both seed-42 (+0.052) and seed-123
+  (+0.037) splits. Promotion is a separate explicit step.
+- Rerank flat-predicted Gemini flash trio rows with a per-fold trio specialist:
+  means tie exactly on seed-42 (0.30079) and flat wins seed-123 (0.3174 vs
+  0.3126); no promotion, flat baseline kept.
+- Promote style+char fusion to the production baseline (config v13, OOF run
+  `ebd7f3471379aa3e`, balanced accuracy 0.3526): final refit, offline
+  prediction, submission validation, and a regenerated self-contained Notebook
+  with the embedded style extractor all pass locally.
+- Extend style vectors with rhetorical/formatting markers (discourse, hedging,
+  self-reference, markdown structure): neutral on the mean on both splits,
+  tighter spread; fusion advantage confirmed independently of markers.
+- Compare frozen MiniLM embeddings + logreg against flat char 2–5 on identical
+  folds: embeddings lose decisively and consistently (0.1345 vs 0.3008, every
+  fold); no promotion. Weights stay Git-ignored under `models/`; Kaggle
+  offline packaging is documented in `docs/embeddings_packaging.md`.
+- Add opt-in `svd_components` LSA projection (TruncatedSVD, sklearn-only, fit
+  per fold): SVD-512 leads on seed-42 (+0.0059) but loses seed-123 (0.3019 vs
+  0.3174); no promotion, flat baseline kept.
 - Add final-fit, offline prediction, and strict submission validation; the
   local three-row Kaggle sample passes the full pipeline smoke test.
 

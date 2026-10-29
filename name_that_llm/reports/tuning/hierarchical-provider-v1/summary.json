@@ -1,0 +1,137 @@
+{
+  "baseline_config_sha256": "80097b9c9e9df68d86b59317c90ca0308b11ac8465b61dce8a95e9549b55ce40",
+  "baseline_config_version": 12,
+  "candidate_count": 2,
+  "candidates": [
+    {
+      "balanced_accuracy": 0.3056276410638827,
+      "balanced_accuracy_std": 0.019559919628460206,
+      "fold_balanced_accuracy": [
+        0.29074074074074074,
+        0.3055555555555555,
+        0.3277777777777778,
+        0.2777777777777778,
+        0.32624521072796936
+      ],
+      "fold_macro_f1": [
+        0.2566222618173721,
+        0.2747589319571454,
+        0.28797402487910023,
+        0.2505399939233326,
+        0.2994811402447444
+      ],
+      "macro_f1": 0.27474862683689,
+      "macro_f1_std": 0.018425079318745183,
+      "name": "hier_char_2_5",
+      "parameters": {
+        "analyzer": "char",
+        "architecture": "hierarchical",
+        "c": 1.0,
+        "classifier": "svc",
+        "max_features": 100000,
+        "min_df": 2,
+        "ngram_range": [
+          2,
+          5
+        ],
+        "sublinear_tf": true,
+        "type": "char_tfidf"
+      },
+      "rank": 1,
+      "recall_by_label": {
+        "claude-fable-5": 0.19463087248322147,
+        "claude-opus-4-6": 0.37333333333333335,
+        "claude-opus-4-8": 0.29333333333333333,
+        "claude-opus-5": 0.62,
+        "claude-sonnet-5": 0.31333333333333335,
+        "gemini-3.1-pro-preview": 0.6866666666666666,
+        "gemini-3.6-flash": 0.38,
+        "gemini-3.7-flash": 0.43333333333333335,
+        "gemini-3.8-flash": 0.30666666666666664,
+        "glm-5.3": 0.07333333333333333,
+        "glm-5.3-flash": 0.02666666666666667,
+        "gpt-5.5": 0.42,
+        "gpt-5.6-luna": 0.3466666666666667,
+        "gpt-5.6-sol": 0.24,
+        "gpt-5.6-terra": 0.25333333333333335,
+        "gpt-6-astra": 0.49333333333333335,
+        "kimi-k3": 0.013333333333333334,
+        "qwen3.8-max": 0.03333333333333333
+      },
+      "runtime_seconds": 121.98014934360981
+    },
+    {
+      "balanced_accuracy": 0.30079045488441464,
+      "balanced_accuracy_std": 0.016583474348804864,
+      "fold_balanced_accuracy": [
+        0.2759259259259259,
+        0.30185185185185187,
+        0.3074074074074074,
+        0.29259259259259257,
+        0.32618135376756063
+      ],
+      "fold_macro_f1": [
+        0.2640262598992912,
+        0.291120282679311,
+        0.2884611281108554,
+        0.28407145321162836,
+        0.31059877572710537
+      ],
+      "macro_f1": 0.29022736687486633,
+      "macro_f1_std": 0.014901235088703746,
+      "name": "flat_char_2_5",
+      "parameters": {
+        "analyzer": "char",
+        "architecture": "flat",
+        "c": 1.0,
+        "classifier": "svc",
+        "max_features": 100000,
+        "min_df": 2,
+        "ngram_range": [
+          2,
+          5
+        ],
+        "sublinear_tf": true,
+        "type": "char_tfidf"
+      },
+      "rank": 2,
+      "recall_by_label": {
+        "claude-fable-5": 0.1342281879194631,
+        "claude-opus-4-6": 0.3333333333333333,
+        "claude-opus-4-8": 0.19333333333333333,
+        "claude-opus-5": 0.6,
+        "claude-sonnet-5": 0.23333333333333334,
+        "gemini-3.1-pro-preview": 0.6666666666666666,
+        "gemini-3.6-flash": 0.38666666666666666,
+        "gemini-3.7-flash": 0.43333333333333335,
+        "gemini-3.8-flash": 0.26,
+        "glm-5.3": 0.15333333333333332,
+        "glm-5.3-flash": 0.09333333333333334,
+        "gpt-5.5": 0.21333333333333335,
+        "gpt-5.6-luna": 0.26,
+        "gpt-5.6-sol": 0.18,
+        "gpt-5.6-terra": 0.23333333333333334,
+        "gpt-6-astra": 0.4866666666666667,
+        "kimi-k3": 0.26,
+        "qwen3.8-max": 0.29333333333333333
+      },
+      "runtime_seconds": 73.83182206191123
+    }
+  ],
+  "experiment_name": "hierarchical-provider-v1",
+  "experiment_run_id": "352960584325780f",
+  "experiment_sha256": "21f2f787b2a383c624204c3aedbd3255a60596ec498e06d01310ecee2e0a36e3",
+  "experiment_version": 1,
+  "failures": [],
+  "git_commit": "bdd71534cac93cdb9cd6ed24e2d0cd0afab78c2d",
+  "hypothesis": "Routing through a provider classifier before within-provider specialists reduces cross-provider errors (especially Gemini flash variants) and improves prompt-held-out balanced accuracy over the flat char 2-5 baseline.",
+  "n_splits": 5,
+  "seed": 42,
+  "source_sha256": "48255c2be87796c7b2168c65a015c4d148e9c6cc1c3f0611ced658214476f01c",
+  "split_sha256": "29ae008bff2004518bfafb93e81c2f281d82b61c57f997ec4acdefed35b2111a",
+  "status": "passed",
+  "successful_count": 2,
+  "summary_path": "/opt/hackcatons/name_that_llm/reports/tuning/hierarchical-provider-v1/summary.json",
+  "train_sha256": "40a22ce8d88c5f46feb4637a099db815bef5f713ffe53e89dbe1b7b21de77707",
+  "working_tree_dirty": true
+}

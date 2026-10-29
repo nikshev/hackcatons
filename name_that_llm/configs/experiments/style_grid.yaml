@@ -1,0 +1,37 @@
+version: 1
+name: style-grid-v1
+hypothesis: >-
+  Explicit stylometric features, alone or fused with char TF-IDF, capture
+  authorial habits that survive the prompt change better than token
+  distributions, improving prompt-held-out balanced accuracy on the same five
+  saved folds.
+output_path: reports/tuning/style-grid-v1/summary.json
+
+candidates:
+  flat_char_2_5:
+    type: char_tfidf
+    analyzer: char
+    ngram_range: [2, 5]
+    min_df: 2
+    max_features: 100000
+    sublinear_tf: true
+    c: 1.0
+    classifier: svc
+    architecture: flat
+
+  style_only:
+    type: style_svc
+    c: 1.0
+    classifier: svc
+    architecture: flat
+
+  style_char_fusion:
+    type: style_char_tfidf
+    analyzer: char
+    ngram_range: [2, 5]
+    min_df: 2
+    max_features: 100000
+    sublinear_tf: true
+    c: 1.0
+    classifier: svc
+    architecture: flat

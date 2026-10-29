@@ -2,7 +2,7 @@
 
 <!-- ГЕНЕРУЄТЬСЯ scripts/trace.py — не редагувати вручну -->
 
-Вимог: **55** · задач: **108** (виконано 106) · вимог у роботі: **2** · порушень: **0**
+Вимог: **87** · задач: **150** (виконано 147) · вимог у роботі: **3** · порушень: **0**
 
 ## 001-competition-readiness-audit
 
@@ -93,6 +93,68 @@
 | `FR-007-02` | The pipeline MUST support a `classifier: logreg` option for | `T-001`, `T-002` | `src/ntllm/training.py` | `tests/test_training.py` |
 | `FR-007-03` | Tuning MUST report mean and per-fold balanced accuracy, macro | `T-005` | `src/ntllm/analysis.py` | `tests/test_analysis.py` |
 | `FR-007-04` | Tuning MUST NOT open `test.csv`, test labels, or leaderboard | `T-006` | `src/ntllm/analysis.py` | `tests/test_analysis.py` |
+
+## 008-hierarchical-provider-model
+
+| Вимога | Опис | Задачі | Імплементація | Тести |
+|---|---|---|---|---|
+| `FR-008-01` | Both architectures MUST use the same saved prompt-group folds, | `T-005` | `src/ntllm/analysis.py` | `tests/test_training.py` |
+| `FR-008-02` | Provider labels MUST derive deterministically from official | `T-001`, `T-002` | `src/ntllm/training.py` | `tests/test_training.py` |
+| `FR-008-03` | Both stages MUST fit only on non-held-out rows; validation | `T-003`, `T-004` | `src/ntllm/training.py` | `tests/test_training.py` |
+| `FR-008-04` | Tuning MUST report mean and per-fold balanced accuracy, macro | `T-006`, `T-007` | `src/ntllm/analysis.py` | `tests/test_training.py` |
+| `FR-008-05` | Tuning MUST NOT open `test.csv` or test labels; failures are | `T-008` | `src/ntllm/analysis.py` | `tests/test_training.py` |
+
+## 009-gemini-rerank-specialist
+
+| Вимога | Опис | Задачі | Імплементація | Тести |
+|---|---|---|---|---|
+| `FR-009-01` | Both candidates MUST use the same saved prompt-group folds, | `T-004` | `src/ntllm/analysis.py` | `tests/test_analysis.py` |
+| `FR-009-02` | The trio is exactly `gemini-3.6-flash`, `gemini-3.7-flash`, | `T-001`, `T-003` | `src/ntllm/training.py` | `tests/test_training.py` |
+| `FR-009-03` | Both stages MUST fit only on non-held-out rows; trio | `T-002` | `src/ntllm/training.py` | `tests/test_training.py` |
+| `FR-009-04` | Tuning MUST report mean and per-fold balanced accuracy, macro | `T-005` | `src/ntllm/analysis.py` | `tests/test_analysis.py` |
+| `FR-009-05` | Tuning MUST NOT open `test.csv` or test labels; failures are | `T-006` | `src/ntllm/analysis.py` | `tests/test_analysis.py` |
+
+## 010-lsa-dense-projection
+
+| Вимога | Опис | Задачі | Імплементація | Тести |
+|---|---|---|---|---|
+| `FR-010-01` | Both candidates MUST use the same saved prompt-group folds, | `T-005` | `src/ntllm/analysis.py` | `tests/test_analysis.py` |
+| `FR-010-02` | TF-IDF configs MAY specify `svd_components`; the projection | `T-001`, `T-002` | `src/ntllm/training.py` | `tests/test_training.py` |
+| `FR-010-03` | Invalid component counts (non-positive, or exceeding | `T-003` | `src/ntllm/training.py` | `tests/test_training.py` |
+| `FR-010-04` | Tuning MUST report mean and per-fold balanced accuracy, macro | `T-006` | `src/ntllm/analysis.py` | `tests/test_analysis.py` |
+| `FR-010-05` | Tuning MUST NOT open `test.csv` or test labels; SVD adds no | `T-007` | `src/ntllm/analysis.py` | `tests/test_analysis.py` |
+| `FR-010-06` | `svd_components` on a dummy candidate MUST be rejected; dummy | `T-004` | `src/ntllm/training.py` | `tests/test_training.py` |
+
+## 011-frozen-embeddings-logreg
+
+| Вимога | Опис | Задачі | Імплементація | Тести |
+|---|---|---|---|---|
+| `FR-011-01` | Both candidates MUST use the same saved prompt-group folds, | `T-005` | `src/ntllm/analysis.py` | `tests/test_analysis.py` |
+| `FR-011-02` | Embeddings MUST come from the vendored local MiniLM directory | `T-001`, `T-002` | `src/ntllm/embeddings.py`, `src/ntllm/training.py` | `tests/test_training.py`, `tests/test_embeddings.py` |
+| `FR-011-03` | The embedding encoder MUST be frozen; the classifier MUST fit | `T-003`, `T-004` | `src/ntllm/training.py` | `tests/test_training.py`, `tests/test_embeddings.py` |
+| `FR-011-04` | Tuning MUST report mean and per-fold balanced accuracy, macro | `T-006` | `src/ntllm/analysis.py` | `tests/test_analysis.py` |
+| `FR-011-05` | Tuning MUST NOT open `test.csv` or test labels; failures are | `T-007` | `src/ntllm/analysis.py` | `tests/test_analysis.py` |
+| `FR-011-06` | A Kaggle packaging note MUST describe offline inference with | `T-008` | — | — |
+
+## 012-stylometric-features
+
+| Вимога | Опис | Задачі | Імплементація | Тести |
+|---|---|---|---|---|
+| `FR-012-01` | All candidates MUST use the same saved prompt-group folds, | `T-005` | `src/ntllm/analysis.py` | `tests/test_analysis.py` |
+| `FR-012-02` | The extractor MUST emit a fixed ordered vector of prompt | `T-001`, `T-002` | `src/ntllm/training.py`, `src/ntllm/stylometry.py` | `tests/test_training.py`, `tests/test_stylometry.py` |
+| `FR-012-03` | Style features MUST be scaled inside the per-fold pipeline fit | `T-003`, `T-004` | `src/ntllm/training.py`, `src/ntllm/stylometry.py` | `tests/test_training.py`, `tests/test_stylometry.py` |
+| `FR-012-04` | Tuning MUST report mean and per-fold balanced accuracy, macro | `T-006` | `src/ntllm/analysis.py` | `tests/test_analysis.py` |
+| `FR-012-05` | Tuning MUST NOT open `test.csv` or test labels; failures are | `T-007` | `src/ntllm/analysis.py` | `tests/test_analysis.py` |
+
+## 013-rhetorical-markers
+
+| Вимога | Опис | Задачі | Імплементація | Тести |
+|---|---|---|---|---|
+| `FR-013-01` | All candidates MUST use the same saved prompt-group folds, | `T-004` | `src/ntllm/analysis.py` | `tests/test_analysis.py` |
+| `FR-013-02` | Marker rates MUST cover discourse connectives, hedging, | `T-001`, `T-002` | `src/ntllm/stylometry.py` | `tests/test_stylometry.py` |
+| `FR-013-03` | Style features MUST be scaled inside the per-fold pipeline on | `T-003` | `src/ntllm/stylometry.py` | `tests/test_stylometry.py` |
+| `FR-013-04` | Tuning MUST report mean and per-fold balanced accuracy, macro | `T-005` | `src/ntllm/analysis.py` | `tests/test_analysis.py` |
+| `FR-013-05` | Tuning MUST NOT open `test.csv` or test labels; failures are | `T-006` | `src/ntllm/analysis.py` | `tests/test_analysis.py` |
 
 ## Критичні задачі
 

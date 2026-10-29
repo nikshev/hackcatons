@@ -1,0 +1,30 @@
+version: 1
+name: hierarchical-provider-v1
+hypothesis: >-
+  Routing through a provider classifier before within-provider specialists
+  reduces cross-provider errors (especially Gemini flash variants) and improves
+  prompt-held-out balanced accuracy over the flat char 2-5 baseline.
+output_path: reports/tuning/hierarchical-provider-v1/summary.json
+
+candidates:
+  flat_char_2_5:
+    type: char_tfidf
+    analyzer: char
+    ngram_range: [2, 5]
+    min_df: 2
+    max_features: 100000
+    sublinear_tf: true
+    c: 1.0
+    classifier: svc
+    architecture: flat
+
+  hier_char_2_5:
+    type: char_tfidf
+    analyzer: char
+    ngram_range: [2, 5]
+    min_df: 2
+    max_features: 100000
+    sublinear_tf: true
+    c: 1.0
+    classifier: svc
+    architecture: hierarchical

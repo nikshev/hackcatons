@@ -1,0 +1,187 @@
+{
+  "baseline_config_sha256": "c7f8f13448c5353f76902f79c44ae83477780ec5c812f5f050a3e9491c49a42c",
+  "baseline_config_version": 1,
+  "candidate_count": 3,
+  "candidates": [
+    {
+      "balanced_accuracy": 0.34817797663435246,
+      "balanced_accuracy_std": 0.011353516152524692,
+      "fold_balanced_accuracy": [
+        0.34074074074074073,
+        0.3611111111111111,
+        0.35555555555555557,
+        0.3537037037037037,
+        0.32982120051085567
+      ],
+      "fold_macro_f1": [
+        0.32387490906763916,
+        0.3333456596168104,
+        0.33816960577377864,
+        0.32917848796020494,
+        0.3177898140333868
+      ],
+      "macro_f1": 0.3288456866068074,
+      "macro_f1_std": 0.0071209210449706606,
+      "name": "style_char_fusion",
+      "parameters": {
+        "analyzer": "char",
+        "architecture": "flat",
+        "c": 1.0,
+        "classifier": "svc",
+        "max_features": 100000,
+        "min_df": 2,
+        "ngram_range": [
+          2,
+          5
+        ],
+        "sublinear_tf": true,
+        "type": "style_char_tfidf"
+      },
+      "rank": 1,
+      "recall_by_label": {
+        "claude-fable-5": 0.08053691275167785,
+        "claude-opus-4-6": 0.5133333333333333,
+        "claude-opus-4-8": 0.18666666666666668,
+        "claude-opus-5": 0.6266666666666667,
+        "claude-sonnet-5": 0.37333333333333335,
+        "gemini-3.1-pro-preview": 0.7733333333333333,
+        "gemini-3.6-flash": 0.42,
+        "gemini-3.7-flash": 0.4066666666666667,
+        "gemini-3.8-flash": 0.29333333333333333,
+        "glm-5.3": 0.15333333333333332,
+        "glm-5.3-flash": 0.13333333333333333,
+        "gpt-5.5": 0.4266666666666667,
+        "gpt-5.6-luna": 0.23333333333333334,
+        "gpt-5.6-sol": 0.10666666666666667,
+        "gpt-5.6-terra": 0.2,
+        "gpt-6-astra": 0.6133333333333333,
+        "kimi-k3": 0.26,
+        "qwen3.8-max": 0.4666666666666667
+      },
+      "runtime_seconds": 753.986062951386
+    },
+    {
+      "balanced_accuracy": 0.3174496644295302,
+      "balanced_accuracy_std": 0.0014695427702316778,
+      "fold_balanced_accuracy": [
+        0.3148148148148148,
+        0.31851851851851853,
+        0.31851851851851853,
+        0.31851851851851853,
+        0.31679438058748405
+      ],
+      "fold_macro_f1": [
+        0.29704774727175687,
+        0.303431700325066,
+        0.3081041349668435,
+        0.3021211509799583,
+        0.30549244882187176
+      ],
+      "macro_f1": 0.3044468802412792,
+      "macro_f1_std": 0.003697726303493046,
+      "name": "flat_char_2_5",
+      "parameters": {
+        "analyzer": "char",
+        "architecture": "flat",
+        "c": 1.0,
+        "classifier": "svc",
+        "max_features": 100000,
+        "min_df": 2,
+        "ngram_range": [
+          2,
+          5
+        ],
+        "sublinear_tf": true,
+        "type": "char_tfidf"
+      },
+      "rank": 2,
+      "recall_by_label": {
+        "claude-fable-5": 0.11409395973154363,
+        "claude-opus-4-6": 0.36666666666666664,
+        "claude-opus-4-8": 0.22666666666666666,
+        "claude-opus-5": 0.64,
+        "claude-sonnet-5": 0.25333333333333335,
+        "gemini-3.1-pro-preview": 0.7066666666666667,
+        "gemini-3.6-flash": 0.44666666666666666,
+        "gemini-3.7-flash": 0.38,
+        "gemini-3.8-flash": 0.35333333333333333,
+        "glm-5.3": 0.12,
+        "glm-5.3-flash": 0.09333333333333334,
+        "gpt-5.5": 0.24666666666666667,
+        "gpt-5.6-luna": 0.25333333333333335,
+        "gpt-5.6-sol": 0.16,
+        "gpt-5.6-terra": 0.2,
+        "gpt-6-astra": 0.49333333333333335,
+        "kimi-k3": 0.2866666666666667,
+        "qwen3.8-max": 0.37333333333333335
+      },
+      "runtime_seconds": 57.25266634300351
+    },
+    {
+      "balanced_accuracy": 0.26112602535421325,
+      "balanced_accuracy_std": 0.012448301478202983,
+      "fold_balanced_accuracy": [
+        0.2537037037037037,
+        0.26296296296296295,
+        0.2833333333333333,
+        0.2462962962962963,
+        0.25932311621966797
+      ],
+      "fold_macro_f1": [
+        0.2201546367873808,
+        0.22869326517398425,
+        0.25459429735649136,
+        0.22030389659664043,
+        0.23666934749212482
+      ],
+      "macro_f1": 0.23335573038665824,
+      "macro_f1_std": 0.012808719842837386,
+      "name": "style_only",
+      "parameters": {
+        "architecture": "flat",
+        "c": 1.0,
+        "classifier": "svc",
+        "type": "style_svc"
+      },
+      "rank": 3,
+      "recall_by_label": {
+        "claude-fable-5": 0.040268456375838924,
+        "claude-opus-4-6": 0.44666666666666666,
+        "claude-opus-4-8": 0.08666666666666667,
+        "claude-opus-5": 0.4666666666666667,
+        "claude-sonnet-5": 0.3466666666666667,
+        "gemini-3.1-pro-preview": 0.6866666666666666,
+        "gemini-3.6-flash": 0.22666666666666666,
+        "gemini-3.7-flash": 0.32,
+        "gemini-3.8-flash": 0.18666666666666668,
+        "glm-5.3": 0.06666666666666667,
+        "glm-5.3-flash": 0.15333333333333332,
+        "gpt-5.5": 0.46,
+        "gpt-5.6-luna": 0.1,
+        "gpt-5.6-sol": 0.04,
+        "gpt-5.6-terra": 0.1,
+        "gpt-6-astra": 0.44666666666666666,
+        "kimi-k3": 0.17333333333333334,
+        "qwen3.8-max": 0.35333333333333333
+      },
+      "runtime_seconds": 42.85408241301775
+    }
+  ],
+  "embedding_model_sha256": null,
+  "experiment_name": "style-grid-seed123-confirmation",
+  "experiment_run_id": "f5515f2d9ae8ad88",
+  "experiment_sha256": "0fe65203251704b45318c568c089b46863f330d3b7cba5f94864884bb644a987",
+  "experiment_version": 1,
+  "failures": [],
+  "git_commit": "bdd71534cac93cdb9cd6ed24e2d0cd0afab78c2d",
+  "hypothesis": "The style+char fusion advantage over flat char TF-IDF persists on a second deterministic prompt-group split.",
+  "n_splits": 5,
+  "seed": 123,
+  "source_sha256": "b94edf6d1d51c5b6aac95e4a13df14b6eb804cbe918887ea4661592550d31572",
+  "split_sha256": "63b05e327a038cbea14673a54a854467eb1a3696984e83736ed3007d7d46d14e",
+  "status": "passed",
+  "successful_count": 3,
+  "summary_path": "/opt/hackcatons/name_that_llm/reports/tuning/style-grid-seed123/summary.json",
+  "train_sha256": "40a22ce8d88c5f46feb4637a099db815bef5f713ffe53e89dbe1b7b21de77707",
+  "working_tree_dirty": true
+}

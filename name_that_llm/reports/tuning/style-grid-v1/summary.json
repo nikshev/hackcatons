@@ -1,0 +1,187 @@
+{
+  "baseline_config_sha256": "80097b9c9e9df68d86b59317c90ca0308b11ac8465b61dce8a95e9549b55ce40",
+  "baseline_config_version": 12,
+  "candidate_count": 3,
+  "candidates": [
+    {
+      "balanced_accuracy": 0.352629878200348,
+      "balanced_accuracy_std": 0.005398024933061746,
+      "fold_balanced_accuracy": [
+        0.35185185185185186,
+        0.35555555555555557,
+        0.34629629629629627,
+        0.34814814814814815,
+        0.36136653895274584
+      ],
+      "fold_macro_f1": [
+        0.3318481321312187,
+        0.3355155675819863,
+        0.3288181694091892,
+        0.33532446031988933,
+        0.3463301670508594
+      ],
+      "macro_f1": 0.3360514809265445,
+      "macro_f1_std": 0.005920877095089472,
+      "name": "style_char_fusion",
+      "parameters": {
+        "analyzer": "char",
+        "architecture": "flat",
+        "c": 1.0,
+        "classifier": "svc",
+        "max_features": 100000,
+        "min_df": 2,
+        "ngram_range": [
+          2,
+          5
+        ],
+        "sublinear_tf": true,
+        "type": "style_char_tfidf"
+      },
+      "rank": 1,
+      "recall_by_label": {
+        "claude-fable-5": 0.10067114093959731,
+        "claude-opus-4-6": 0.5066666666666667,
+        "claude-opus-4-8": 0.18666666666666668,
+        "claude-opus-5": 0.64,
+        "claude-sonnet-5": 0.38666666666666666,
+        "gemini-3.1-pro-preview": 0.7666666666666667,
+        "gemini-3.6-flash": 0.4066666666666667,
+        "gemini-3.7-flash": 0.42,
+        "gemini-3.8-flash": 0.26666666666666666,
+        "glm-5.3": 0.17333333333333334,
+        "glm-5.3-flash": 0.18,
+        "gpt-5.5": 0.4266666666666667,
+        "gpt-5.6-luna": 0.24666666666666667,
+        "gpt-5.6-sol": 0.12666666666666668,
+        "gpt-5.6-terra": 0.2,
+        "gpt-6-astra": 0.5466666666666666,
+        "kimi-k3": 0.29333333333333333,
+        "qwen3.8-max": 0.47333333333333333
+      },
+      "runtime_seconds": 719.6011702530086
+    },
+    {
+      "balanced_accuracy": 0.30079045488441464,
+      "balanced_accuracy_std": 0.016583474348804864,
+      "fold_balanced_accuracy": [
+        0.2759259259259259,
+        0.30185185185185187,
+        0.3074074074074074,
+        0.29259259259259257,
+        0.32618135376756063
+      ],
+      "fold_macro_f1": [
+        0.2640262598992912,
+        0.291120282679311,
+        0.2884611281108554,
+        0.28407145321162836,
+        0.31059877572710537
+      ],
+      "macro_f1": 0.29022736687486633,
+      "macro_f1_std": 0.014901235088703746,
+      "name": "flat_char_2_5",
+      "parameters": {
+        "analyzer": "char",
+        "architecture": "flat",
+        "c": 1.0,
+        "classifier": "svc",
+        "max_features": 100000,
+        "min_df": 2,
+        "ngram_range": [
+          2,
+          5
+        ],
+        "sublinear_tf": true,
+        "type": "char_tfidf"
+      },
+      "rank": 2,
+      "recall_by_label": {
+        "claude-fable-5": 0.1342281879194631,
+        "claude-opus-4-6": 0.3333333333333333,
+        "claude-opus-4-8": 0.19333333333333333,
+        "claude-opus-5": 0.6,
+        "claude-sonnet-5": 0.23333333333333334,
+        "gemini-3.1-pro-preview": 0.6666666666666666,
+        "gemini-3.6-flash": 0.38666666666666666,
+        "gemini-3.7-flash": 0.43333333333333335,
+        "gemini-3.8-flash": 0.26,
+        "glm-5.3": 0.15333333333333332,
+        "glm-5.3-flash": 0.09333333333333334,
+        "gpt-5.5": 0.21333333333333335,
+        "gpt-5.6-luna": 0.26,
+        "gpt-5.6-sol": 0.18,
+        "gpt-5.6-terra": 0.23333333333333334,
+        "gpt-6-astra": 0.4866666666666667,
+        "kimi-k3": 0.26,
+        "qwen3.8-max": 0.29333333333333333
+      },
+      "runtime_seconds": 49.6980517487973
+    },
+    {
+      "balanced_accuracy": 0.259634601043997,
+      "balanced_accuracy_std": 0.00955569859680736,
+      "fold_balanced_accuracy": [
+        0.25,
+        0.2648148148148148,
+        0.2462962962962963,
+        0.2685185185185185,
+        0.2685823754789272
+      ],
+      "fold_macro_f1": [
+        0.22044411891785717,
+        0.23417606944103397,
+        0.21719335543030155,
+        0.24676748927766948,
+        0.23919839703032897
+      ],
+      "macro_f1": 0.23303714695549413,
+      "macro_f1_std": 0.011193032318758744,
+      "name": "style_only",
+      "parameters": {
+        "architecture": "flat",
+        "c": 1.0,
+        "classifier": "svc",
+        "type": "style_svc"
+      },
+      "rank": 3,
+      "recall_by_label": {
+        "claude-fable-5": 0.013422818791946308,
+        "claude-opus-4-6": 0.4066666666666667,
+        "claude-opus-4-8": 0.12,
+        "claude-opus-5": 0.4666666666666667,
+        "claude-sonnet-5": 0.3333333333333333,
+        "gemini-3.1-pro-preview": 0.6933333333333334,
+        "gemini-3.6-flash": 0.2,
+        "gemini-3.7-flash": 0.36666666666666664,
+        "gemini-3.8-flash": 0.16666666666666666,
+        "glm-5.3": 0.06,
+        "glm-5.3-flash": 0.14666666666666667,
+        "gpt-5.5": 0.44666666666666666,
+        "gpt-5.6-luna": 0.10666666666666667,
+        "gpt-5.6-sol": 0.05333333333333334,
+        "gpt-5.6-terra": 0.09333333333333334,
+        "gpt-6-astra": 0.4066666666666667,
+        "kimi-k3": 0.20666666666666667,
+        "qwen3.8-max": 0.38666666666666666
+      },
+      "runtime_seconds": 47.11566252633929
+    }
+  ],
+  "embedding_model_sha256": null,
+  "experiment_name": "style-grid-v1",
+  "experiment_run_id": "764706ecc5a67e4e",
+  "experiment_sha256": "3fe13291042c86a57f9d4095c30c1efdff064bb1310ba0aef65bdf1244794cf9",
+  "experiment_version": 1,
+  "failures": [],
+  "git_commit": "bdd71534cac93cdb9cd6ed24e2d0cd0afab78c2d",
+  "hypothesis": "Explicit stylometric features, alone or fused with char TF-IDF, capture authorial habits that survive the prompt change better than token distributions, improving prompt-held-out balanced accuracy on the same five saved folds.",
+  "n_splits": 5,
+  "seed": 42,
+  "source_sha256": "b94edf6d1d51c5b6aac95e4a13df14b6eb804cbe918887ea4661592550d31572",
+  "split_sha256": "29ae008bff2004518bfafb93e81c2f281d82b61c57f997ec4acdefed35b2111a",
+  "status": "passed",
+  "successful_count": 3,
+  "summary_path": "/opt/hackcatons/name_that_llm/reports/tuning/style-grid-v1/summary.json",
+  "train_sha256": "40a22ce8d88c5f46feb4637a099db815bef5f713ffe53e89dbe1b7b21de77707",
+  "working_tree_dirty": true
+}

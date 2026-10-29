@@ -1,0 +1,137 @@
+{
+  "baseline_config_sha256": "c7f8f13448c5353f76902f79c44ae83477780ec5c812f5f050a3e9491c49a42c",
+  "baseline_config_version": 1,
+  "candidate_count": 2,
+  "candidates": [
+    {
+      "balanced_accuracy": 0.3174496644295302,
+      "balanced_accuracy_std": 0.0014695427702316778,
+      "fold_balanced_accuracy": [
+        0.3148148148148148,
+        0.31851851851851853,
+        0.31851851851851853,
+        0.31851851851851853,
+        0.31679438058748405
+      ],
+      "fold_macro_f1": [
+        0.29704774727175687,
+        0.303431700325066,
+        0.3081041349668435,
+        0.3021211509799583,
+        0.30549244882187176
+      ],
+      "macro_f1": 0.3044468802412792,
+      "macro_f1_std": 0.003697726303493046,
+      "name": "flat_char_2_5",
+      "parameters": {
+        "analyzer": "char",
+        "architecture": "flat",
+        "c": 1.0,
+        "classifier": "svc",
+        "max_features": 100000,
+        "min_df": 2,
+        "ngram_range": [
+          2,
+          5
+        ],
+        "sublinear_tf": true,
+        "type": "char_tfidf"
+      },
+      "rank": 1,
+      "recall_by_label": {
+        "claude-fable-5": 0.11409395973154363,
+        "claude-opus-4-6": 0.36666666666666664,
+        "claude-opus-4-8": 0.22666666666666666,
+        "claude-opus-5": 0.64,
+        "claude-sonnet-5": 0.25333333333333335,
+        "gemini-3.1-pro-preview": 0.7066666666666667,
+        "gemini-3.6-flash": 0.44666666666666666,
+        "gemini-3.7-flash": 0.38,
+        "gemini-3.8-flash": 0.35333333333333333,
+        "glm-5.3": 0.12,
+        "glm-5.3-flash": 0.09333333333333334,
+        "gpt-5.5": 0.24666666666666667,
+        "gpt-5.6-luna": 0.25333333333333335,
+        "gpt-5.6-sol": 0.16,
+        "gpt-5.6-terra": 0.2,
+        "gpt-6-astra": 0.49333333333333335,
+        "kimi-k3": 0.2866666666666667,
+        "qwen3.8-max": 0.37333333333333335
+      },
+      "runtime_seconds": 67.74092931300402
+    },
+    {
+      "balanced_accuracy": 0.3126348496147154,
+      "balanced_accuracy_std": 0.0037799005656200414,
+      "fold_balanced_accuracy": [
+        0.3055555555555556,
+        0.3148148148148148,
+        0.31296296296296294,
+        0.31666666666666665,
+        0.31309067688378034
+      ],
+      "fold_macro_f1": [
+        0.28795684669062444,
+        0.2997517236925032,
+        0.30242014891159674,
+        0.29921892789645516,
+        0.30363446253933307
+      ],
+      "macro_f1": 0.2998453251871909,
+      "macro_f1_std": 0.005566426831031357,
+      "name": "rerank_gemini_trio",
+      "parameters": {
+        "analyzer": "char",
+        "architecture": "gemini_rerank",
+        "c": 1.0,
+        "classifier": "svc",
+        "max_features": 100000,
+        "min_df": 2,
+        "ngram_range": [
+          2,
+          5
+        ],
+        "sublinear_tf": true,
+        "type": "char_tfidf"
+      },
+      "rank": 2,
+      "recall_by_label": {
+        "claude-fable-5": 0.11409395973154363,
+        "claude-opus-4-6": 0.36666666666666664,
+        "claude-opus-4-8": 0.22666666666666666,
+        "claude-opus-5": 0.64,
+        "claude-sonnet-5": 0.25333333333333335,
+        "gemini-3.1-pro-preview": 0.7066666666666667,
+        "gemini-3.6-flash": 0.4266666666666667,
+        "gemini-3.7-flash": 0.3466666666666667,
+        "gemini-3.8-flash": 0.32,
+        "glm-5.3": 0.12,
+        "glm-5.3-flash": 0.09333333333333334,
+        "gpt-5.5": 0.24666666666666667,
+        "gpt-5.6-luna": 0.25333333333333335,
+        "gpt-5.6-sol": 0.16,
+        "gpt-5.6-terra": 0.2,
+        "gpt-6-astra": 0.49333333333333335,
+        "kimi-k3": 0.2866666666666667,
+        "qwen3.8-max": 0.37333333333333335
+      },
+      "runtime_seconds": 101.02320051193237
+    }
+  ],
+  "experiment_name": "gemini-rerank-seed123-confirmation",
+  "experiment_run_id": "2b4753c6361b2740",
+  "experiment_sha256": "75e0388dd9416f3a9a8412e189c5656dd19bde8f73d933cbc2509afe0ab3e797",
+  "experiment_version": 1,
+  "failures": [],
+  "git_commit": "bdd71534cac93cdb9cd6ed24e2d0cd0afab78c2d",
+  "hypothesis": "The trio rerank shows no mean difference on seed-42; confirm the tie holds on a second deterministic prompt-group split before closing the hypothesis.",
+  "n_splits": 5,
+  "seed": 123,
+  "source_sha256": "cd2f9e3209cfce2ddb2677cd591d853f51b550ca8af40d8b348c6437f0f93c28",
+  "split_sha256": "63b05e327a038cbea14673a54a854467eb1a3696984e83736ed3007d7d46d14e",
+  "status": "passed",
+  "successful_count": 2,
+  "summary_path": "/opt/hackcatons/name_that_llm/reports/tuning/gemini-rerank-seed123/summary.json",
+  "train_sha256": "40a22ce8d88c5f46feb4637a099db815bef5f713ffe53e89dbe1b7b21de77707",
+  "working_tree_dirty": true
+}

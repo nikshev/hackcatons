@@ -6,6 +6,11 @@ impl: FR-003-05, FR-003-09
 impl: FR-003-06, FR-003-07
 impl: FR-003-08
 impl: FR-007-02
+impl: FR-008-02, FR-008-03
+impl: FR-009-02, FR-009-03
+impl: FR-010-02, FR-010-03, FR-010-06
+impl: FR-011-02, FR-011-03
+impl: FR-012-02, FR-012-03
 """
 
 from __future__ import annotations
@@ -30,6 +35,7 @@ from typing import Iterable, Mapping, Sequence
 import pyarrow as pa
 import pyarrow.parquet as parquet
 import yaml
+from sklearn.decomposition import TruncatedSVD
 from sklearn.dummy import DummyClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
@@ -91,6 +97,31 @@ def _make_vectorizer(
     )
 
 
+def _linear_classifier(
+    model_config: Mapping[str, object], candidate_name: str, seed: int, *, dual: bool = True
+):
+    """Shared LinearSVC / logreg choice for TF-IDF and style estimators."""
+    classifier_name = model_config.get("classifier", "svc")
+    c_value = model_config.get("c")
+    if isinstance(c_value, bool) or not isinstance(c_value, (int, float)) or c_value <= 0:
+        raise TrainingError(f"model '{candidate_name}' requires a positive 'c' value")
+    if classifier_name == "svc":
+        max_iter = model_config.get("max_iter", 1000)
+        if isinstance(max_iter, bool) or not isinstance(max_iter, int) or max_iter < 1:
+            raise TrainingError(f"model '{candidate_name}' requires a positive integer 'max_iter'")
+        return LinearSVC(C=float(c_value), dual=dual, max_iter=max_iter, random_state=seed)
+    if classifier_name == "logreg":
+        return LogisticRegression(
+            C=float(c_value),
+            solver="lbfgs",
+            max_iter=500,
+            random_state=seed,
+        )
+    raise TrainingError(
+        f"model '{candidate_name}' has unknown classifier '{classifier_name}'"
+    )
+
+
 def build_estimator(
     candidate_name: str,
     model_config: Mapping[str, object],
@@ -100,10 +131,75 @@ def build_estimator(
     """Build one configured estimator; vectorizers stay inside the fit pipeline."""
     model_type = model_config.get("type")
     if model_type == "dummy":
+        if "svd_components" in model_config:
+            raise TrainingError(f"model '{candidate_name}' cannot combine dummy with 'svd_components'")
         strategy = model_config.get("strategy", "most_frequent")
         if strategy not in {"most_frequent", "prior", "stratified", "uniform"}:
             raise TrainingError(f"model '{candidate_name}' has an unsupported dummy strategy")
         return DummyClassifier(strategy=strategy, random_state=seed)
+    if model_type == "sbert_logreg":
+        if "svd_components" in model_config:
+            raise TrainingError(f"model '{candidate_name}' cannot combine sbert with 'svd_components'")
+        c_value = model_config.get("c")
+        if isinstance(c_value, bool) or not isinstance(c_value, (int, float)) or c_value <= 0:
+            raise TrainingError(f"model '{candidate_name}' requires a positive 'c' value")
+        max_iter = model_config.get("max_iter", 1000)
+        if isinstance(max_iter, bool) or not isinstance(max_iter, int) or max_iter < 1:
+            raise TrainingError(f"model '{candidate_name}' requires a positive integer 'max_iter'")
+        return LogisticRegression(
+            C=float(c_value),
+            solver="lbfgs",
+            max_iter=max_iter,
+            random_state=seed,
+        )
+    svd_components = model_config.get("svd_components")
+    if svd_components is not None and (
+        isinstance(svd_components, bool) or not isinstance(svd_components, int) or svd_components < 1
+    ):
+        raise TrainingError(f"model '{candidate_name}' requires a positive integer 'svd_components'")
+
+    if model_type in {"style_svc", "style_char_tfidf"}:
+        if svd_components is not None:
+            raise TrainingError(f"model '{candidate_name}' cannot combine style features with 'svd_components'")
+        from ntllm.stylometry import StyleTransformer
+
+        from sklearn.preprocessing import StandardScaler
+
+        style_branch: list[tuple[str, object]] = [
+            ("extract", StyleTransformer()),
+            ("scaler", StandardScaler()),
+        ]
+        if model_type == "style_svc":
+            # Dense few-feature input: solve the primal problem, which converges
+            # where the dual formulation stalls. Same model family, solver detail.
+            classifier = _linear_classifier(model_config, candidate_name, seed, dual=False)
+            return Pipeline(
+                [
+                    ("style", Pipeline(style_branch)),
+                    ("classifier", classifier),
+                ]
+            )
+        char_tfidf = _make_vectorizer(
+            analyzer=model_config.get("analyzer", "char"),
+            ngram_range=model_config.get("ngram_range"),
+            min_df=model_config.get("min_df", 1),
+            max_features=model_config.get("max_features"),
+            sublinear_tf=model_config.get("sublinear_tf", True),
+            model_name=candidate_name,
+        )
+        if model_config.get("analyzer", "char") not in {"char", "char_wb"}:
+            raise TrainingError(f"model '{candidate_name}' has unsupported char analyzer")
+        return Pipeline(
+            [
+                (
+                    "features",
+                    FeatureUnion(
+                        [("char", char_tfidf), ("style", Pipeline(style_branch))]
+                    ),
+                ),
+                ("classifier", _linear_classifier(model_config, candidate_name, seed)),
+            ]
+        )
 
     if model_type not in {"word_tfidf", "char_tfidf", "word_char_tfidf"}:
         raise TrainingError(f"model '{candidate_name}' has unknown type '{model_type}'")
@@ -162,26 +258,14 @@ def build_estimator(
                 ),
             ]
         )
-    classifier_name = model_config.get("classifier", "svc")
-    if classifier_name == "svc":
-        classifier = LinearSVC(C=float(c_value), dual=True, random_state=seed)
-    elif classifier_name == "logreg":
-        classifier = LogisticRegression(
-            C=float(c_value),
-            solver="lbfgs",
-            max_iter=500,
-            random_state=seed,
+    classifier = _linear_classifier(model_config, candidate_name, seed)
+    steps: list[tuple[str, object]] = [("features", features)]
+    if svd_components is not None:
+        steps.append(
+            ("svd", TruncatedSVD(n_components=svd_components, random_state=seed))
         )
-    else:
-        raise TrainingError(
-            f"model '{candidate_name}' has unknown classifier '{classifier_name}'"
-        )
-    return Pipeline(
-        [
-            ("features", features),
-            ("classifier", classifier),
-        ]
-    )
+    steps.append(("classifier", classifier))
+    return Pipeline(steps)
 
 
 def _score_predictions(
@@ -322,6 +406,585 @@ def evaluate_oof(
                 raise TrainingError(f"model '{candidate_name}' returned an incomplete fold {fold}")
             fold_prediction_records: list[dict[str, str | int]] = []
             for row, predicted in zip(validation_rows, fold_predictions, strict=True):
+                predicted_label = str(predicted)
+                if predicted_label not in allowed_labels:
+                    raise TrainingError(
+                        f"model '{candidate_name}' predicted unrecognized label '{predicted_label}'"
+                    )
+                fold_prediction_records.append({
+                    "id": row[id_column],
+                    "prompt_id": row[group_column],
+                    "fold": fold,
+                    "candidate": candidate_name,
+                    "actual": row[label_column],
+                    "prediction": predicted_label,
+                })
+            candidate_predictions.extend(fold_prediction_records)
+            fold_score = _score_predictions(
+                [str(item["actual"]) for item in fold_prediction_records],
+                [str(item["prediction"]) for item in fold_prediction_records],
+                allowed_order,
+            )
+            fold_metrics.append({
+                "fold": fold,
+                "row_count": len(fold_prediction_records),
+                "group_count": len({item["prompt_id"] for item in fold_prediction_records}),
+                **fold_score,
+            })
+
+        candidate_predictions.sort(key=lambda item: str(item["id"]))
+        if len(candidate_predictions) != len(ids) or {
+            item["id"] for item in candidate_predictions
+        } != set(ids):
+            raise TrainingError(f"model '{candidate_name}' did not produce exactly one OOF prediction per ID")
+
+        actual = [str(item["actual"]) for item in candidate_predictions]
+        predicted = [str(item["prediction"]) for item in candidate_predictions]
+        metrics[candidate_name] = {
+            **_score_predictions(actual, predicted, allowed_order),
+            "fold_metrics": fold_metrics,
+            "runtime_seconds": time.perf_counter() - started,
+        }
+        predictions.extend(candidate_predictions)
+
+    predictions.sort(key=lambda item: (str(item["candidate"]), str(item["id"])))
+    return OOFBenchmark(predictions=tuple(predictions), metrics=metrics)
+
+
+_PROVIDER_PREFIXES: tuple[tuple[str, str], ...] = (
+    ("gpt", "openai"),
+    ("gemini", "google"),
+    ("claude", "anthropic"),
+    ("qwen", "qwen"),
+    ("glm", "zai"),
+    ("kimi", "moonshot"),
+)
+
+
+def provider_of_label(label: str) -> str:
+    """Map an official model name to its provider lab, deterministically."""
+    if not isinstance(label, str) or not label.strip():
+        raise TrainingError("cannot derive a provider from a blank label")
+    lowered = label.strip().lower()
+    for prefix, provider in _PROVIDER_PREFIXES:
+        if lowered == prefix or lowered.startswith(prefix):
+            return provider
+    raise TrainingError(f"label '{label}' has no recognized provider prefix")
+
+
+def evaluate_hierarchical_oof(
+    records: Iterable[Mapping[str, str]],
+    assignments: Iterable[Mapping[str, object]],
+    *,
+    id_column: str,
+    group_column: str,
+    text_column: str,
+    label_column: str,
+    allowed_labels: Sequence[str],
+    n_splits: int,
+    seed: int,
+    models: Mapping[str, Mapping[str, object]],
+) -> OOFBenchmark:
+    """Two-stage OOF evaluation: provider router, then within-provider specialist.
+
+    Architecture is the only difference from `evaluate_oof`: features, folds,
+    seed, and allowlist are identical. Both stages fit exclusively on
+    non-held-out rows.
+    """
+    if isinstance(n_splits, bool) or not isinstance(n_splits, int) or n_splits < 2:
+        raise TrainingError("n_splits must be at least two")
+    if isinstance(seed, bool) or not isinstance(seed, int):
+        raise TrainingError("seed must be an integer")
+    if not allowed_labels or any(not isinstance(label, str) or not label.strip() for label in allowed_labels):
+        raise TrainingError("official allowed_labels must contain nonblank strings")
+    if len(set(allowed_labels)) != len(allowed_labels):
+        raise TrainingError("official allowed_labels contains duplicates")
+    if not models:
+        raise TrainingError("at least one baseline model must be configured")
+    provider_of_allowed = {label: provider_of_label(label) for label in allowed_labels}
+
+    rows = list(records)
+    ids: dict[str, Mapping[str, str]] = {}
+    for row_number, row in enumerate(rows, start=1):
+        identifier = row.get(id_column)
+        group = row.get(group_column)
+        text = row.get(text_column)
+        label = row.get(label_column)
+        for field_name, value in (
+            ("id", identifier),
+            ("prompt group", group),
+            ("text", text),
+            ("label", label),
+        ):
+            if not isinstance(value, str) or not value.strip():
+                raise TrainingError(f"train row {row_number} has a blank {field_name}")
+        if identifier in ids:
+            raise TrainingError(f"train data has duplicate id '{identifier}'")
+        if label not in allowed_labels:
+            raise TrainingError(f"train data has unrecognized label '{label}'")
+        ids[identifier] = row
+
+    missing_labels = sorted(set(allowed_labels) - {row[label_column] for row in rows})
+    if missing_labels:
+        raise TrainingError(f"train data is missing allowed labels: {', '.join(missing_labels)}")
+
+    assignment_by_id: dict[str, tuple[str, int]] = {}
+    fold_groups: dict[str, set[int]] = {}
+    for assignment in assignments:
+        identifier = assignment.get("id")
+        group = assignment.get("prompt_id")
+        fold = assignment.get("fold")
+        if not isinstance(identifier, str) or not isinstance(group, str):
+            raise TrainingError("split assignments require string id and prompt_id fields")
+        if isinstance(fold, bool) or not isinstance(fold, int) or not 0 <= fold < n_splits:
+            raise TrainingError(f"split assignment for '{identifier}' has invalid fold")
+        if identifier in assignment_by_id:
+            raise TrainingError(f"split assignments repeat id '{identifier}'")
+        if identifier not in ids:
+            raise TrainingError(f"split assignments contain unknown id '{identifier}'")
+        if ids[identifier][group_column] != group:
+            raise TrainingError(f"split group does not match training row for id '{identifier}'")
+        assignment_by_id[identifier] = (group, fold)
+        fold_groups.setdefault(group, set()).add(fold)
+
+    if set(assignment_by_id) != set(ids):
+        raise TrainingError("split assignments have missing or extra IDs")
+    if any(len(folds) != 1 for folds in fold_groups.values()):
+        raise TrainingError("a prompt group appears in multiple validation folds")
+    if {fold for _, fold in assignment_by_id.values()} != set(range(n_splits)):
+        raise TrainingError("split assignments do not contain every configured fold")
+
+    rows_by_fold: dict[int, list[Mapping[str, str]]] = {
+        fold: [row for row in rows if assignment_by_id[row[id_column]][1] == fold]
+        for fold in range(n_splits)
+    }
+    if any(not fold_rows for fold_rows in rows_by_fold.values()):
+        raise TrainingError("every validation fold must contain at least one row")
+
+    predictions: list[dict[str, str | int]] = []
+    metrics: dict[str, dict[str, object]] = {}
+    allowed_order = list(allowed_labels)
+    for candidate_name, model_config in models.items():
+        if not isinstance(candidate_name, str) or not candidate_name.strip() or not isinstance(model_config, Mapping):
+            raise TrainingError("model definitions must be named mappings")
+        architecture = model_config.get("architecture", "hierarchical")
+        if architecture != "hierarchical":
+            raise TrainingError(f"model '{candidate_name}' is not a hierarchical candidate")
+        started = time.perf_counter()
+        candidate_predictions: list[dict[str, str | int]] = []
+        fold_metrics: list[dict[str, object]] = []
+        for fold in range(n_splits):
+            validation_rows = rows_by_fold[fold]
+            fit_rows = [row for row in rows if assignment_by_id[row[id_column]][1] != fold]
+            try:
+                router = build_estimator(candidate_name, model_config, seed=seed)
+                router.fit(
+                    [row[text_column] for row in fit_rows],
+                    [provider_of_allowed[row[label_column]] for row in fit_rows],
+                )
+                specialists: dict[str, object] = {}
+                fallback_counts: Counter[str] = Counter()
+                for provider in sorted({provider_of_allowed[row[label_column]] for row in fit_rows}):
+                    provider_rows = [
+                        row for row in fit_rows
+                        if provider_of_allowed[row[label_column]] == provider
+                    ]
+                    provider_labels = [row[label_column] for row in provider_rows]
+                    fallback_counts.update(provider_labels)
+                    distinct = sorted(set(provider_labels))
+                    if len(distinct) == 1:
+                        specialists[provider] = distinct[0]
+                    else:
+                        specialist = build_estimator(candidate_name, model_config, seed=seed)
+                        specialist.fit(
+                            [row[text_column] for row in provider_rows],
+                            provider_labels,
+                        )
+                        specialists[provider] = specialist
+                global_fallback = fallback_counts.most_common(1)[0][0]
+                routed = router.predict([row[text_column] for row in validation_rows])
+            except TrainingError:
+                raise
+            except Exception as exc:
+                raise TrainingError(f"model '{candidate_name}' failed on fold {fold}: {exc}") from exc
+            if len(routed) != len(validation_rows):
+                raise TrainingError(f"model '{candidate_name}' returned an incomplete fold {fold}")
+            fold_prediction_records: list[dict[str, str | int]] = []
+            for row, routed_provider in zip(validation_rows, routed, strict=True):
+                specialist = specialists.get(str(routed_provider))
+                if specialist is None:
+                    predicted_label = global_fallback
+                elif isinstance(specialist, str):
+                    predicted_label = specialist
+                else:
+                    try:
+                        predicted_label = str(specialist.predict([row[text_column]])[0])
+                    except Exception as exc:
+                        raise TrainingError(
+                            f"model '{candidate_name}' specialist failed on fold {fold}: {exc}"
+                        ) from exc
+                if predicted_label not in allowed_labels:
+                    raise TrainingError(
+                        f"model '{candidate_name}' predicted unrecognized label '{predicted_label}'"
+                    )
+                fold_prediction_records.append({
+                    "id": row[id_column],
+                    "prompt_id": row[group_column],
+                    "fold": fold,
+                    "candidate": candidate_name,
+                    "actual": row[label_column],
+                    "prediction": predicted_label,
+                })
+            candidate_predictions.extend(fold_prediction_records)
+            fold_score = _score_predictions(
+                [str(item["actual"]) for item in fold_prediction_records],
+                [str(item["prediction"]) for item in fold_prediction_records],
+                allowed_order,
+            )
+            fold_metrics.append({
+                "fold": fold,
+                "row_count": len(fold_prediction_records),
+                "group_count": len({item["prompt_id"] for item in fold_prediction_records}),
+                **fold_score,
+            })
+
+        candidate_predictions.sort(key=lambda item: str(item["id"]))
+        if len(candidate_predictions) != len(ids) or {
+            item["id"] for item in candidate_predictions
+        } != set(ids):
+            raise TrainingError(f"model '{candidate_name}' did not produce exactly one OOF prediction per ID")
+
+        actual = [str(item["actual"]) for item in candidate_predictions]
+        predicted = [str(item["prediction"]) for item in candidate_predictions]
+        metrics[candidate_name] = {
+            **_score_predictions(actual, predicted, allowed_order),
+            "fold_metrics": fold_metrics,
+            "runtime_seconds": time.perf_counter() - started,
+        }
+        predictions.extend(candidate_predictions)
+
+    predictions.sort(key=lambda item: (str(item["candidate"]), str(item["id"])))
+    return OOFBenchmark(predictions=tuple(predictions), metrics=metrics)
+
+
+GEMINI_TRIO: tuple[str, ...] = ("gemini-3.6-flash", "gemini-3.7-flash", "gemini-3.8-flash")
+
+
+def evaluate_gemini_rerank_oof(
+    records: Iterable[Mapping[str, str]],
+    assignments: Iterable[Mapping[str, object]],
+    *,
+    id_column: str,
+    group_column: str,
+    text_column: str,
+    label_column: str,
+    allowed_labels: Sequence[str],
+    n_splits: int,
+    seed: int,
+    models: Mapping[str, Mapping[str, object]],
+) -> OOFBenchmark:
+    """Flat pass plus a per-fold trio specialist rerank for Gemini-flash rows.
+
+    Only validation rows the flat stage assigns to the trio are rescored, by a
+    specialist fit exclusively on trio rows of the same fold-train set. All
+    other predictions pass through unchanged.
+    """
+    if isinstance(n_splits, bool) or not isinstance(n_splits, int) or n_splits < 2:
+        raise TrainingError("n_splits must be at least two")
+    if isinstance(seed, bool) or not isinstance(seed, int):
+        raise TrainingError("seed must be an integer")
+    if not allowed_labels or any(not isinstance(label, str) or not label.strip() for label in allowed_labels):
+        raise TrainingError("official allowed_labels must contain nonblank strings")
+    if len(set(allowed_labels)) != len(allowed_labels):
+        raise TrainingError("official allowed_labels contains duplicates")
+    if not models:
+        raise TrainingError("at least one baseline model must be configured")
+    if set(GEMINI_TRIO) - set(allowed_labels):
+        raise TrainingError("official allowlist does not contain the full Gemini trio")
+
+    rows = list(records)
+    ids: dict[str, Mapping[str, str]] = {}
+    for row_number, row in enumerate(rows, start=1):
+        identifier = row.get(id_column)
+        group = row.get(group_column)
+        text = row.get(text_column)
+        label = row.get(label_column)
+        for field_name, value in (
+            ("id", identifier),
+            ("prompt group", group),
+            ("text", text),
+            ("label", label),
+        ):
+            if not isinstance(value, str) or not value.strip():
+                raise TrainingError(f"train row {row_number} has a blank {field_name}")
+        if identifier in ids:
+            raise TrainingError(f"train data has duplicate id '{identifier}'")
+        if label not in allowed_labels:
+            raise TrainingError(f"train data has unrecognized label '{label}'")
+        ids[identifier] = row
+
+    missing_labels = sorted(set(allowed_labels) - {row[label_column] for row in rows})
+    if missing_labels:
+        raise TrainingError(f"train data is missing allowed labels: {', '.join(missing_labels)}")
+
+    assignment_by_id: dict[str, tuple[str, int]] = {}
+    fold_groups: dict[str, set[int]] = {}
+    for assignment in assignments:
+        identifier = assignment.get("id")
+        group = assignment.get("prompt_id")
+        fold = assignment.get("fold")
+        if not isinstance(identifier, str) or not isinstance(group, str):
+            raise TrainingError("split assignments require string id and prompt_id fields")
+        if isinstance(fold, bool) or not isinstance(fold, int) or not 0 <= fold < n_splits:
+            raise TrainingError(f"split assignment for '{identifier}' has invalid fold")
+        if identifier in assignment_by_id:
+            raise TrainingError(f"split assignments repeat id '{identifier}'")
+        if identifier not in ids:
+            raise TrainingError(f"split assignments contain unknown id '{identifier}'")
+        if ids[identifier][group_column] != group:
+            raise TrainingError(f"split group does not match training row for id '{identifier}'")
+        assignment_by_id[identifier] = (group, fold)
+        fold_groups.setdefault(group, set()).add(fold)
+
+    if set(assignment_by_id) != set(ids):
+        raise TrainingError("split assignments have missing or extra IDs")
+    if any(len(folds) != 1 for folds in fold_groups.values()):
+        raise TrainingError("a prompt group appears in multiple validation folds")
+    if {fold for _, fold in assignment_by_id.values()} != set(range(n_splits)):
+        raise TrainingError("split assignments do not contain every configured fold")
+
+    rows_by_fold: dict[int, list[Mapping[str, str]]] = {
+        fold: [row for row in rows if assignment_by_id[row[id_column]][1] == fold]
+        for fold in range(n_splits)
+    }
+    if any(not fold_rows for fold_rows in rows_by_fold.values()):
+        raise TrainingError("every validation fold must contain at least one row")
+
+    predictions: list[dict[str, str | int]] = []
+    metrics: dict[str, dict[str, object]] = {}
+    allowed_order = list(allowed_labels)
+    trio_set = set(GEMINI_TRIO)
+    for candidate_name, model_config in models.items():
+        if not isinstance(candidate_name, str) or not candidate_name.strip() or not isinstance(model_config, Mapping):
+            raise TrainingError("model definitions must be named mappings")
+        architecture = model_config.get("architecture", "gemini_rerank")
+        if architecture != "gemini_rerank":
+            raise TrainingError(f"model '{candidate_name}' is not a Gemini-rerank candidate")
+        started = time.perf_counter()
+        candidate_predictions: list[dict[str, str | int]] = []
+        fold_metrics: list[dict[str, object]] = []
+        for fold in range(n_splits):
+            validation_rows = rows_by_fold[fold]
+            fit_rows = [row for row in rows if assignment_by_id[row[id_column]][1] != fold]
+            try:
+                flat = build_estimator(candidate_name, model_config, seed=seed)
+                flat.fit(
+                    [row[text_column] for row in fit_rows],
+                    [row[label_column] for row in fit_rows],
+                )
+                flat_predictions = flat.predict([row[text_column] for row in validation_rows])
+                trio_fit_rows = [row for row in fit_rows if row[label_column] in trio_set]
+                trio_labels = sorted({row[label_column] for row in trio_fit_rows})
+                specialist = None
+                if len(trio_labels) == 1:
+                    specialist = trio_labels[0]
+                elif trio_labels:
+                    specialist = build_estimator(candidate_name, model_config, seed=seed)
+                    specialist.fit(
+                        [row[text_column] for row in trio_fit_rows],
+                        [row[label_column] for row in trio_fit_rows],
+                    )
+            except TrainingError:
+                raise
+            except Exception as exc:
+                raise TrainingError(f"model '{candidate_name}' failed on fold {fold}: {exc}") from exc
+            if len(flat_predictions) != len(validation_rows):
+                raise TrainingError(f"model '{candidate_name}' returned an incomplete fold {fold}")
+            fold_prediction_records: list[dict[str, str | int]] = []
+            for row, flat_predicted in zip(validation_rows, flat_predictions, strict=True):
+                flat_label = str(flat_predicted)
+                if flat_label not in allowed_labels:
+                    raise TrainingError(
+                        f"model '{candidate_name}' predicted unrecognized label '{flat_label}'"
+                    )
+                if flat_label in trio_set and specialist is not None:
+                    if isinstance(specialist, str):
+                        predicted_label = specialist
+                    else:
+                        try:
+                            predicted_label = str(specialist.predict([row[text_column]])[0])
+                        except Exception as exc:
+                            raise TrainingError(
+                                f"model '{candidate_name}' specialist failed on fold {fold}: {exc}"
+                            ) from exc
+                    if predicted_label not in trio_set:
+                        raise TrainingError(
+                            f"model '{candidate_name}' specialist predicted outside the trio: '{predicted_label}'"
+                        )
+                else:
+                    predicted_label = flat_label
+                fold_prediction_records.append({
+                    "id": row[id_column],
+                    "prompt_id": row[group_column],
+                    "fold": fold,
+                    "candidate": candidate_name,
+                    "actual": row[label_column],
+                    "prediction": predicted_label,
+                })
+            candidate_predictions.extend(fold_prediction_records)
+            fold_score = _score_predictions(
+                [str(item["actual"]) for item in fold_prediction_records],
+                [str(item["prediction"]) for item in fold_prediction_records],
+                allowed_order,
+            )
+            fold_metrics.append({
+                "fold": fold,
+                "row_count": len(fold_prediction_records),
+                "group_count": len({item["prompt_id"] for item in fold_prediction_records}),
+                **fold_score,
+            })
+
+        candidate_predictions.sort(key=lambda item: str(item["id"]))
+        if len(candidate_predictions) != len(ids) or {
+            item["id"] for item in candidate_predictions
+        } != set(ids):
+            raise TrainingError(f"model '{candidate_name}' did not produce exactly one OOF prediction per ID")
+
+        actual = [str(item["actual"]) for item in candidate_predictions]
+        predicted = [str(item["prediction"]) for item in candidate_predictions]
+        metrics[candidate_name] = {
+            **_score_predictions(actual, predicted, allowed_order),
+            "fold_metrics": fold_metrics,
+            "runtime_seconds": time.perf_counter() - started,
+        }
+        predictions.extend(candidate_predictions)
+
+    predictions.sort(key=lambda item: (str(item["candidate"]), str(item["id"])))
+    return OOFBenchmark(predictions=tuple(predictions), metrics=metrics)
+
+
+def evaluate_embedding_oof(
+    records: Iterable[Mapping[str, str]],
+    assignments: Iterable[Mapping[str, object]],
+    *,
+    id_column: str,
+    group_column: str,
+    text_column: str,
+    label_column: str,
+    allowed_labels: Sequence[str],
+    n_splits: int,
+    seed: int,
+    models: Mapping[str, Mapping[str, object]],
+    embedding_model_dir: str | Path,
+) -> OOFBenchmark:
+    """OOF evaluation on frozen precomputed embeddings.
+
+    The encoder runs once over all training texts (it is frozen, so this leaks
+    nothing); each candidate's classifier fits only on non-held-out fold rows.
+    """
+    from ntllm.embeddings import encode_texts
+
+    if isinstance(n_splits, bool) or not isinstance(n_splits, int) or n_splits < 2:
+        raise TrainingError("n_splits must be at least two")
+    if isinstance(seed, bool) or not isinstance(seed, int):
+        raise TrainingError("seed must be an integer")
+    if not allowed_labels or any(not isinstance(label, str) or not label.strip() for label in allowed_labels):
+        raise TrainingError("official allowed_labels must contain nonblank strings")
+    if len(set(allowed_labels)) != len(allowed_labels):
+        raise TrainingError("official allowed_labels contains duplicates")
+    if not models:
+        raise TrainingError("at least one baseline model must be configured")
+
+    rows = list(records)
+    ids: dict[str, Mapping[str, str]] = {}
+    for row_number, row in enumerate(rows, start=1):
+        identifier = row.get(id_column)
+        group = row.get(group_column)
+        text = row.get(text_column)
+        label = row.get(label_column)
+        for field_name, value in (
+            ("id", identifier),
+            ("prompt group", group),
+            ("text", text),
+            ("label", label),
+        ):
+            if not isinstance(value, str) or not value.strip():
+                raise TrainingError(f"train row {row_number} has a blank {field_name}")
+        if identifier in ids:
+            raise TrainingError(f"train data has duplicate id '{identifier}'")
+        if label not in allowed_labels:
+            raise TrainingError(f"train data has unrecognized label '{label}'")
+        ids[identifier] = row
+
+    missing_labels = sorted(set(allowed_labels) - {row[label_column] for row in rows})
+    if missing_labels:
+        raise TrainingError(f"train data is missing allowed labels: {', '.join(missing_labels)}")
+
+    assignment_by_id: dict[str, tuple[str, int]] = {}
+    fold_groups: dict[str, set[int]] = {}
+    for assignment in assignments:
+        identifier = assignment.get("id")
+        group = assignment.get("prompt_id")
+        fold = assignment.get("fold")
+        if not isinstance(identifier, str) or not isinstance(group, str):
+            raise TrainingError("split assignments require string id and prompt_id fields")
+        if isinstance(fold, bool) or not isinstance(fold, int) or not 0 <= fold < n_splits:
+            raise TrainingError(f"split assignment for '{identifier}' has invalid fold")
+        if identifier in assignment_by_id:
+            raise TrainingError(f"split assignments repeat id '{identifier}'")
+        if identifier not in ids:
+            raise TrainingError(f"split assignments contain unknown id '{identifier}'")
+        if ids[identifier][group_column] != group:
+            raise TrainingError(f"split group does not match training row for id '{identifier}'")
+        assignment_by_id[identifier] = (group, fold)
+        fold_groups.setdefault(group, set()).add(fold)
+
+    if set(assignment_by_id) != set(ids):
+        raise TrainingError("split assignments have missing or extra IDs")
+    if any(len(folds) != 1 for folds in fold_groups.values()):
+        raise TrainingError("a prompt group appears in multiple validation folds")
+    if {fold for _, fold in assignment_by_id.values()} != set(range(n_splits)):
+        raise TrainingError("split assignments do not contain every configured fold")
+
+    rows_by_fold: dict[int, list[int]] = {
+        fold: [index for index, row in enumerate(rows) if assignment_by_id[row[id_column]][1] == fold]
+        for fold in range(n_splits)
+    }
+    if any(not fold_rows for fold_rows in rows_by_fold.values()):
+        raise TrainingError("every validation fold must contain at least one row")
+
+    vectors = encode_texts([row[text_column] for row in rows], embedding_model_dir)
+    if len(vectors) != len(rows):
+        raise TrainingError("encoder returned a different number of vectors than train rows")
+
+    predictions: list[dict[str, str | int]] = []
+    metrics: dict[str, dict[str, object]] = {}
+    allowed_order = list(allowed_labels)
+    for candidate_name, model_config in models.items():
+        if not isinstance(candidate_name, str) or not candidate_name.strip() or not isinstance(model_config, Mapping):
+            raise TrainingError("model definitions must be named mappings")
+        if model_config.get("type") != "sbert_logreg":
+            raise TrainingError(f"model '{candidate_name}' is not an sbert embedding candidate")
+        started = time.perf_counter()
+        candidate_predictions: list[dict[str, str | int]] = []
+        fold_metrics: list[dict[str, object]] = []
+        for fold in range(n_splits):
+            validation_idx = rows_by_fold[fold]
+            fit_idx = [index for index in range(len(rows)) if assignment_by_id[rows[index][id_column]][1] != fold]
+            estimator = build_estimator(candidate_name, model_config, seed=seed)
+            try:
+                estimator.fit(
+                    vectors[fit_idx],
+                    [rows[index][label_column] for index in fit_idx],
+                )
+                fold_predictions = estimator.predict(vectors[validation_idx])
+            except Exception as exc:
+                raise TrainingError(f"model '{candidate_name}' failed on fold {fold}: {exc}") from exc
+            if len(fold_predictions) != len(validation_idx):
+                raise TrainingError(f"model '{candidate_name}' returned an incomplete fold {fold}")
+            fold_prediction_records: list[dict[str, str | int]] = []
+            for index, predicted in zip(validation_idx, fold_predictions, strict=True):
+                row = rows[index]
                 predicted_label = str(predicted)
                 if predicted_label not in allowed_labels:
                     raise TrainingError(

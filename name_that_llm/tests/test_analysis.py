@@ -7,6 +7,21 @@
 # verifies: FR-006-07
 # verifies: FR-006-08
 # verifies: FR-006-09
+# verifies: FR-009-01
+# verifies: FR-009-04
+# verifies: FR-009-05
+# verifies: FR-010-01
+# verifies: FR-010-04
+# verifies: FR-010-05
+# verifies: FR-011-01
+# verifies: FR-011-04
+# verifies: FR-011-05
+# verifies: FR-012-01
+# verifies: FR-012-04
+# verifies: FR-012-05
+# verifies: FR-013-01
+# verifies: FR-013-04
+# verifies: FR-013-05
 # verifies: FR-007-01
 # verifies: FR-007-03
 # verifies: FR-007-04
@@ -224,6 +239,75 @@ def test_tuning_rejects_stale_data_before_writing_summary(tmp_path):
     assert not (tmp_path / "reports" / "tuning" / "stale-grid").exists()
 
 
+def test_tune_routes_embedding_candidate_on_identical_folds_without_test_data(tmp_path, monkeypatch):
+    import numpy as np
+
+    from ntllm import embeddings as embeddings_module
+
+    config_path, _, _ = make_analysis_project(tmp_path)
+    assert not (tmp_path / "kaggle" / "test.csv").exists()
+
+    def fake_encode(texts, model_dir, batch_size=64):
+        vectors = np.zeros((len(texts), 4), dtype=np.float32)
+        for i, text in enumerate(texts):
+            vectors[i] = np.float32([float((hash(f"{text}-{j}") % 997)) / 997.0 for j in range(4)])
+        norms = np.linalg.norm(vectors, axis=1, keepdims=True)
+        return vectors / np.maximum(norms, 1e-12)
+
+    monkeypatch.setattr(embeddings_module, "encode_texts", fake_encode)
+    fake_model = tmp_path / "fake-minilm"
+    fake_model.mkdir()
+    (fake_model / "pytorch_model.bin").write_bytes(b"fake-weights")
+    (fake_model / "config.json").write_text("{}", encoding="utf-8")
+    experiment_path = tmp_path / "configs" / "experiments" / "emb.yaml"
+    experiment_path.parent.mkdir(parents=True, exist_ok=True)
+    experiment_path.write_text(
+        yaml.safe_dump({
+            "version": 1,
+            "name": "emb-grid",
+            "embedding_model_dir": "fake-minilm",
+            "output_path": "reports/tuning/emb-grid/summary.json",
+            "candidates": {
+                "flat_dummy": {"type": "dummy", "strategy": "most_frequent"},
+                "emb_logreg": {"type": "sbert_logreg", "c": 1.0, "max_iter": 200},
+            },
+        }),
+        encoding="utf-8",
+    )
+
+    result = tune_from_config(config_path, experiment_path)
+
+    assert result["status"] == "passed"
+    assert [candidate["rank"] for candidate in result["candidates"]] == [1, 2]
+    assert all(len(candidate["fold_balanced_accuracy"]) == 2 for candidate in result["candidates"])
+    assert len(result["embedding_model_sha256"]) == 64
+
+
+def test_tune_supports_style_candidates_on_identical_folds(tmp_path):
+    config_path, _, _ = make_analysis_project(tmp_path)
+    experiment_path = tmp_path / "configs" / "experiments" / "style.yaml"
+    experiment_path.parent.mkdir(parents=True, exist_ok=True)
+    experiment_path.write_text(
+        yaml.safe_dump({
+            "version": 1,
+            "name": "style-grid",
+            "output_path": "reports/tuning/style-grid/summary.json",
+            "candidates": {
+                "flat_dummy": {"type": "dummy", "strategy": "most_frequent"},
+                "style_dummy": {"type": "style_svc", "c": 1.0},
+            },
+        }),
+        encoding="utf-8",
+    )
+
+    result = tune_from_config(config_path, experiment_path)
+
+    assert result["status"] == "passed"
+    assert [candidate["rank"] for candidate in result["candidates"]] == [1, 2]
+    assert all(len(candidate["fold_balanced_accuracy"]) == 2 for candidate in result["candidates"])
+    assert not (tmp_path / "kaggle" / "test.csv").exists()
+
+
 def test_tune_cli_reports_candidate_ranking(tmp_path, capsys):
     config_path, _, _ = make_analysis_project(tmp_path)
     experiment_path = tmp_path / "configs" / "experiments" / "cli.yaml"
@@ -243,3 +327,36 @@ def test_tune_cli_reports_candidate_ranking(tmp_path, capsys):
     output = capsys.readouterr().out
     assert "tune: passed — 1/1 candidates" in output
     assert (tmp_path / "reports" / "tuning" / "cli-grid" / "summary.json").is_file()
+
+
+def test_tune_reports_rerank_candidate_failure_explicitly_without_test_file(tmp_path):
+    config_path, _, _ = make_analysis_project(tmp_path)
+    assert not (tmp_path / "kaggle" / "test.csv").exists()
+    experiment_path = tmp_path / "configs" / "experiments" / "rerank.yaml"
+    experiment_path.parent.mkdir(parents=True, exist_ok=True)
+    experiment_path.write_text(
+        yaml.safe_dump({
+            "version": 1,
+            "name": "rerank-guard",
+            "output_path": "reports/tuning/rerank-guard/summary.json",
+            "candidates": {
+                "flat_dummy": {"type": "dummy", "strategy": "most_frequent"},
+                "trio_rerank": {
+                    "type": "word_tfidf",
+                    "ngram_range": [1, 1],
+                    "min_df": 1,
+                    "max_features": 100,
+                    "sublinear_tf": True,
+                    "c": 1.0,
+                    "architecture": "gemini_rerank",
+                },
+            },
+        }),
+        encoding="utf-8",
+    )
+
+    result = tune_from_config(config_path, experiment_path)
+
+    assert result["status"] == "failed"
+    assert [candidate["name"] for candidate in result["candidates"]] == ["flat_dummy"]
+    assert any(failure["name"] == "trio_rerank" for failure in result["failures"])

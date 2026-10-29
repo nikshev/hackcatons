@@ -38,8 +38,10 @@ def test_notebook_is_generated_from_current_baseline_config():
 
     assert notebook["nbformat"] == 4
     assert notebook["metadata"]["kernelspec"]["name"] == "python3"
-    assert "CONFIG_VERSION = 12" in code
-    assert "MODEL_CANDIDATE = 'char_tfidf_svc'" in code
+    assert "CONFIG_VERSION = 13" in code
+    assert "MODEL_CANDIDATE = 'style_char_fusion'" in code
+    assert "StyleTransformer" in code
+    assert "MODEL_HAS_STYLE = True" in code
     assert "claude-fable-5" in code
     assert "submission.parquet" in code
     assert "pip install" not in code
@@ -127,6 +129,73 @@ def test_generated_notebook_runs_offline_on_fixture_and_writes_valid_submission(
     assert summary["fit_seconds"] >= 0
     assert summary["predict_seconds"] >= 0
     assert "alpha blue flower" not in json.dumps(summary)
+
+
+def test_generated_fusion_notebook_runs_offline_on_fixture(tmp_path, monkeypatch):
+    labels = ["model-a", "model-b"]
+    config = {
+        "version": 11,
+        "data": {
+            "column_roles": {"id": "id", "prompt_id": "prompt_id", "text": "text", "label": "model"},
+            "files": {},
+        },
+        "competition": {"allowed_labels": labels},
+        "training": {
+            "models": {
+                "fusion": {
+                    "type": "style_char_tfidf",
+                    "analyzer": "char",
+                    "ngram_range": [2, 3],
+                    "min_df": 1,
+                    "max_features": 500,
+                    "sublinear_tf": True,
+                    "c": 1.0,
+                    "classifier": "svc",
+                }
+            }
+        },
+        "validation": {"seed": 42},
+        "inference": {"model_candidate": "fusion"},
+    }
+    config_path = tmp_path / "project" / "configs" / "baseline.yaml"
+    config_path.parent.mkdir(parents=True)
+    config_path.write_text(yaml.safe_dump(config), encoding="utf-8")
+    data_dir = tmp_path / "competition-data"
+    write_csv(
+        data_dir / "train.csv",
+        ["id", "prompt_id", "text", "model"],
+        [
+            {"id": "a1", "prompt_id": "p1", "text": "alpha blue flower!", "model": "model-a"},
+            {"id": "a2", "prompt_id": "p2", "text": "alpha green garden?", "model": "model-a"},
+            {"id": "b1", "prompt_id": "p3", "text": "beta orange engine.", "model": "model-b"},
+            {"id": "b2", "prompt_id": "p4", "text": "beta yellow machine;", "model": "model-b"},
+        ],
+    )
+    write_csv(
+        data_dir / "test.csv",
+        ["id", "text"],
+        [
+            {"id": "test-1", "text": "alpha flower"},
+            {"id": "test-2", "text": "beta engine"},
+        ],
+    )
+    output_dir = tmp_path / "notebook-output"
+    monkeypatch.setenv("NTLLM_DATA_DIR", str(data_dir))
+    monkeypatch.setenv("NTLLM_OUTPUT_DIR", str(output_dir))
+    code = "".join(
+        "".join(cell["source"])
+        for cell in build_notebook(config_path)["cells"]
+        if cell["cell_type"] == "code"
+    )
+    assert "StyleTransformer" in code
+
+    exec(compile(code, "submission-notebook-fusion.py", "exec"), {"__name__": "__main__"})
+
+    submission = parquet.read_table(output_dir / "submission.parquet")
+    assert submission.schema.names == ["id", "model"]
+    rows = submission.to_pylist()
+    assert [row["id"] for row in rows] == ["test-1", "test-2"]
+    assert all(row["model"] in labels for row in rows)
 
 
 def test_notebook_generator_rejects_non_char_selected_model(tmp_path):

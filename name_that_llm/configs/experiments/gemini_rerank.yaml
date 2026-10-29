@@ -1,0 +1,30 @@
+version: 1
+name: gemini-rerank-v1
+hypothesis: >-
+  Rescoring only flat-predicted Gemini flash trio rows with a per-fold trio
+  specialist reduces the largest mutual-confusion cluster and improves
+  prompt-held-out balanced accuracy over flat char 2-5.
+output_path: reports/tuning/gemini-rerank-v1/summary.json
+
+candidates:
+  flat_char_2_5:
+    type: char_tfidf
+    analyzer: char
+    ngram_range: [2, 5]
+    min_df: 2
+    max_features: 100000
+    sublinear_tf: true
+    c: 1.0
+    classifier: svc
+    architecture: flat
+
+  rerank_gemini_trio:
+    type: char_tfidf
+    analyzer: char
+    ngram_range: [2, 5]
+    min_df: 2
+    max_features: 100000
+    sublinear_tf: true
+    c: 1.0
+    classifier: svc
+    architecture: gemini_rerank
